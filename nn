@@ -1,0 +1,20 @@
+2048:
+INFO:root:Average time for each epoch:  19.15974708
+INFO:root:Time needed for training:     95.79934263
+INFO:root:Loss: nan     Accuracy: 10.059%       F_Score: 1.828%
+512:
+INFO:root:Average time for each epoch:  32.75873728
+INFO:root:Time needed for training:     163.79441786
+INFO:root:Loss: nan     Accuracy: 9.930%        F_Score: 1.807%
+256:
+INFO:root:Average time for each epoch:  51.35268607
+INFO:root:Time needed for training:     256.76411963
+INFO:root:Loss: nan     Accuracy: 9.996%        F_Score: 1.818%
+64:
+INFO:root:Average time for each epoch:  156.02531433
+INFO:root:Time needed for training:     780.12725854
+INFO:root:Loss: nan     Accuracy: 9.996%        F_Score: 1.818%
+
+
+
+sudo userdocker run -w /home/skallenberg/MasterThesis/ -it wi2:pytorch
