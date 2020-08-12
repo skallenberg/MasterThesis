@@ -2,10 +2,15 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from utils.config import Config
+import multiprocessing
 
 config = Config.get_instance()
 
 data_name = config["Setup"]["Data"]
+
+global worker_count
+# worker_count = multiprocessing.cpu_count()
+worker_count = 3
 
 
 class dataset:
@@ -17,6 +22,61 @@ class dataset:
 
 
 def get_data(augment=False):
+    if data_name == "mnist":
+        mean = (0.49139968,)
+        std = (0.24703233,)
+        if augment:
+            tr_transform = transforms.Compose(
+                [
+                    transforms.RandomCrop(32, padding=4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    transforms.Normalize(mean, std),
+                ]
+            )
+        else:
+            tr_transform = transforms.Compose(
+                [transforms.ToTensor(), transforms.Normalize(mean, std),]
+            )
+        val_transform = transforms.Compose(
+            [transforms.ToTensor(), transforms.Normalize(mean, std),]
+        )
+        trainset = torchvision.datasets.MNIST(
+            root="./data/datasets", train=True, download=True, transform=tr_transform,
+        )
+
+        testset = torchvision.datasets.MNIST(
+            root="./data/datasets", train=False, download=True, transform=val_transform,
+        )
+        classes = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+    if data_name == "svhn":
+        mean = [0.5, 0.5, 0.5]
+        std = [0.5, 0.5, 0.5]
+        if augment:
+            tr_transform = transforms.Compose(
+                [
+                    transforms.RandomCrop(32, padding=4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    transforms.Normalize(mean, std),
+                ]
+            )
+        else:
+            tr_transform = transforms.Compose(
+                [transforms.ToTensor(), transforms.Normalize(mean, std),]
+            )
+        val_transform = transforms.Compose(
+            [transforms.ToTensor(), transforms.Normalize(mean, std),]
+        )
+        trainset = torchvision.datasets.SVHN(
+            root="./data/datasets", train=True, download=True, transform=tr_transform,
+        )
+
+        testset = torchvision.datasets.SVHN(
+            root="./data/datasets", train=False, download=True, transform=val_transform,
+        )
+        classes = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+
     if data_name == "cifar10":
         mean = [0.49139968, 0.48215827, 0.44653124]
         std = [0.24703233, 0.24348505, 0.26158768]
@@ -41,16 +101,8 @@ def get_data(augment=False):
             root="./data/datasets", train=True, download=True, transform=tr_transform
         )
 
-        trainloader = torch.utils.data.DataLoader(
-            trainset, batch_size=64, shuffle=True, num_workers=2
-        )
-
         testset = torchvision.datasets.CIFAR10(
             root="./data/datasets", train=False, download=True, transform=val_transform
-        )
-
-        testloader = torch.utils.data.DataLoader(
-            testset, batch_size=64, shuffle=False, num_workers=2
         )
 
         classes = (
@@ -90,16 +142,8 @@ def get_data(augment=False):
             root="./data/datasets", train=True, download=True, transform=tr_transform
         )
 
-        trainloader = torch.utils.data.DataLoader(
-            trainset, batch_size=64, shuffle=True, num_workers=2
-        )
-
         testset = torchvision.datasets.CIFAR100(
             root="./data/datasets", train=False, download=True, transform=val_transform
-        )
-
-        testloader = torch.utils.data.DataLoader(
-            testset, batch_size=64, shuffle=False, num_workers=2
         )
 
         classes = (
@@ -205,4 +249,20 @@ def get_data(augment=False):
             "tractor",
         )
 
+    trainloader = torch.utils.data.DataLoader(
+        trainset,
+        batch_size=config["DataLoader"]["TrainSize"],
+        shuffle=True,
+        num_workers=config["DataLoader"]["Num_Workers"],
+        pin_memory=config["DataLoader"]["Pin_Memory"],
+        drop_last=config["DataLoader"]["Drop_Last"],
+    )
+    testloader = torch.utils.data.DataLoader(
+        testset,
+        batch_size=config["DataLoader"]["TestSize"],
+        shuffle=False,
+        pin_memory=config["DataLoader"]["Pin_Memory"],
+        drop_last=config["DataLoader"]["Drop_Last"],
+        num_workers=config["DataLoader"]["Num_Workers"],
+    )
     return dataset(data_name, trainloader, testloader, classes)

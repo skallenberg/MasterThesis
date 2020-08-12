@@ -13,24 +13,31 @@ config = Config.get_instance()
 # matplotlib.use("Qt5Agg")
 
 if torch.cuda.is_available():
-    device = torch.device("cuda")
+    device = torch.device(config["Setup"]["Device"])
 else:
     device = torch.device("cpu")
 
 
 def rev_normalize(img):
     if config["Setup"]["Data"] == "cifar10":
-        return img / 2 + 0.5
+        std = [0.24703233, 0.24348505, 0.26158768]
+        mean = [0.49139968, 0.48215827, 0.44653124]
+        img[0, :, :] = img[0, :, :] * std[0] + mean[0]
+        img[1, :, :] = img[1, :, :] * std[1] + mean[1]
+        img[2, :, :] = img[2, :, :] * std[2] + mean[2]
+        return img
 
 
-def imshow(img):
+def imshow(img, show=True):
     img = rev_normalize(img)
     npimg = img.numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    plt.show()
+    if show:
+        plt.show()
+    return
 
 
-def show(dataset, nimages=4, net=None):
+def show(dataset, nimages=4, net=None, pltshow=True):
 
     dataiter = iter(dataset.testloader)
     images, labels = dataiter.next()
@@ -38,7 +45,7 @@ def show(dataset, nimages=4, net=None):
 
     classes = dataset.classes
 
-    imshow(torchvision.utils.make_grid(images))
+    imshow(torchvision.utils.make_grid(images), show=pltshow)
     print("GroundTruth: ", " ".join("%5s" % classes[labels[j]] for j in range(4)))
 
     if net is not None:

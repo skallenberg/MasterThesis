@@ -7,48 +7,74 @@ import logging
 from utils import visualize, set_config
 from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
+import time
 
 config = Config.get_instance()
 criterion = nn.CrossEntropyLoss()
 
 if torch.cuda.is_available():
-    device = torch.device("cuda:1")
+    device = torch.device(config["Setup"]["Device"])
+    if torch.cuda.device_count() > 1:
+        config["Setup"]["Parallel"] = 1
+    else:
+        config["Setup"]["Parallel"] = 0
 else:
     device = torch.device("cpu")
 
 
-def train(net, dataset):
+def train(net, dataset, return_data=False):
 
-    writer_name = (
-        net.name
-        + "_"
-        + dataset.name
-        + "_"
-        + datetime.now().strftime("%m-%d-%Y-%H:%M:%S")
-    )
-    writer = SummaryWriter("./data/models/log/runs/" + writer_name + "/train")
+    if config["Setup"]["Parallel"] == 1:
+        writer_name = (
+            net.module.name
+            + "_"
+            + dataset.name
+            + "_"
+            + datetime.now().strftime("%m-%d-%Y-%H:%M:%S")
+        )
+        writer = SummaryWriter("./data/models/log/runs/" + writer_name + "/train")
 
-    net.writer = writer_name
+        net.module.writer = writer_name
+    else:
+        writer_name = (
+            net.name
+            + "_"
+            + dataset.name
+            + "_"
+            + datetime.now().strftime("%m-%d-%Y-%H:%M:%S")
+        )
+        writer = SummaryWriter("./data/models/log/runs/" + writer_name + "/train")
+
+        net.writer = writer_name
+
     optimizer = set_config.choose_optimizer(net)
 
-    for epoch in range(
-        config["Setup"]["Epochs"]
-    ):  # loop over the dataset multiple times
+    loss_list = []
+    accuracy_list = []
+    f_score_list = []
+    iter_list = []
+
+    _global_start = time.time()
+
+    logging.info("Started Training")
+
+    _epoch_process_time = 0
+
+    for epoch in range(config["Setup"]["Epochs"]):
 
         running_loss = 0.0
         correct = 0
         total = 0
         cumulated_labels = []
         cumulated_predictions = []
-        for i, data in enumerate(dataset.trainloader, 0):
 
-            if i > 50:
-                break
+        _epoch_start = time.time()
+
+        for i, data in enumerate(dataset.trainloader):
+            optimizer.zero_grad()
 
             inputs, labels = data
             inputs, labels = inputs.to(device), labels.to(device)
-
-            optimizer.zero_grad()
 
             outputs = net(inputs)
 
@@ -60,70 +86,80 @@ def train(net, dataset):
 
             _, predicted = torch.max(outputs.data, 1)
 
-            cumulated_labels.extend(labels.tolist())
-            cumulated_predictions.extend(predicted.tolist())
-
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-            if i % 10 == 9:
+            if i % 100 == 99:
+                loss_avg = running_loss / 100
+                acc = 100 * correct / total
+                iteration = epoch * len(list(dataset.trainloader)) + i
                 writer.add_scalar(
-                    "Loss/Train",
-                    running_loss / 10,
-                    epoch * len(dataset.trainloader) + i,
+                    "Loss/Train", loss_avg, iteration,
                 )
-                writer.add_scalar(
-                    "Accuracy/Train",
-                    100 * correct / total,
-                    epoch * len(dataset.trainloader) + i,
-                )
-                writer.add_scalar(
-                    "F-Score/Train",
-                    100
-                    * f1_score(
-                        y_true=cumulated_labels,
-                        y_pred=cumulated_predictions,
-                        average="macro",
-                    ),
-                    epoch * len(dataset.trainloader) + i,
-                )
-                # writer.add_figure(
-                #    "Predictions vs. Truth",
-                #    visualize.plot_classes_preds(net, inputs, labels, dataset.classes),
-                #    global_step=epoch * len(dataset.trainloader) + i,
-                # )
+                writer.add_scalar("Accuracy/Train", acc, iteration)
+                logging.info("Loss:\t%.4f\tAcc:\t%.4f" % (loss_avg, acc))
+                iter_list.append(iteration)
+                loss_list.append(loss_avg)
+                accuracy_list.append(acc)
 
                 running_loss = 0.0
                 correct = 0
                 total = 0
-                cumulated_labels = []
-                cumulated_predictions = []
-    print("Finished Training")
-    PATH = (
-        "./data/models/save/"
-        + net.name
-        + "_"
-        + dataset.name
-        + "_"
-        + datetime.now().strftime("%m-%d-%Y-%H:%M:%S")
-        + ".pth"
+
+        logging.info("Finished Epoch %i / %i" % (epoch + 1, config["Setup"]["Epochs"]))
+
+        _epoch_end = time.time()
+
+        _epoch_time = _epoch_end - _epoch_start
+
+        _epoch_process_time += _epoch_time
+        logging.info("Time for epoch:\t%8.8f" % (_epoch_time))
+
+    logging.info("Finished Training")
+    _global_end = time.time()
+
+    _global_process_time = _global_end - _global_start
+
+    logging.info(
+        "Average time for each epoch:\t%8.8f"
+        % (_epoch_process_time / config["Setup"]["Epochs"])
     )
+    logging.info("Time needed for training:\t%8.8f" % (_global_process_time))
+    if config["Setup"]["Parallel"] == 1:
+        PATH = (
+            "./data/models/save/"
+            + net.module.name
+            + "_"
+            + dataset.name
+            + "_"
+            + datetime.now().strftime("%m-%d-%Y-%H:%M:%S")
+            + ".pth"
+        )
+    else:
+        PATH = (
+            "./data/models/save/"
+            + net.name
+            + "_"
+            + dataset.name
+            + "_"
+            + datetime.now().strftime("%m-%d-%Y-%H:%M:%S")
+            + ".pth"
+        )
+
     torch.save(net.state_dict(), PATH)
-    return net
+
+    if return_data:
+        return net, iter_list, loss_list, accuracy_list
+    else:
+        return net
 
 
-def test(net, dataset):
+def test(net, dataset, return_data=False):
 
-    writer = SummaryWriter("./data/models/log/runs/" + net.writer + "/test")
-
-    correct = 0
-    total = 0
-    num_classes = len(dataset.classes)
-    class_correct = list(0.0 for i in range(num_classes))
-    class_total = list(0.0 for i in range(num_classes))
-    running_loss = 0.0
-    cumulated_labels = []
-    cumulated_predictions = []
+    if config["Setup"]["Parallel"] == 1:
+        writer = SummaryWriter("./data/models/log/runs/" + net.module.writer + "/test")
+    else:
+        writer = SummaryWriter("./data/models/log/runs/" + net.writer + "/test")
 
     final_correct = 0
     final_total = 0
@@ -134,68 +170,27 @@ def test(net, dataset):
     with torch.no_grad():
         for idx, data in enumerate(dataset.testloader):
 
-            if idx > 10:
-                break
-
             inputs, labels = data
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = net(inputs)
 
             loss = criterion(outputs, labels)
-            running_loss += loss.item()
             final_running_loss += loss.item()
 
             _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
 
             final_total += labels.size(0)
             final_correct += (predicted == labels).sum().item()
 
-            c = (predicted == labels).squeeze()
-
-            cumulated_labels.extend(labels.tolist())
-            cumulated_predictions.extend(predicted.tolist())
-
             final_cumulated_labels.extend(labels.tolist())
             final_cumulated_predictions.extend(predicted.tolist())
 
-            if idx % 10 == 9:
-                writer.add_scalar(
-                    "Loss/Test", running_loss / 10, len(dataset.trainloader) + idx
-                )
-                writer.add_scalar(
-                    "Accuracy/Test",
-                    100 * correct / total,
-                    len(dataset.trainloader) + idx,
-                )
-                writer.add_scalar(
-                    "F-Score/Test",
-                    100
-                    * f1_score(
-                        y_true=cumulated_labels,
-                        y_pred=cumulated_predictions,
-                        average="macro",
-                    ),
-                    len(dataset.trainloader) + idx,
-                )
+    logging.info("Final Metrics")
 
-                running_loss = 0.0
-                correct = 0
-                total = 0
-                cumulated_labels = []
-                cumulated_predictions = []
-
-            for i in range(len(labels)):
-                label = labels[i]
-                class_correct[label] += c[i].item()
-                class_total[label] += 1
-
-    print("Final Metrics")
-    print(
+    logging.info(
         "Loss: %.3f\tAccuracy: %.3f%%\tF_Score: %.3f%%"
         % (
-            final_running_loss / 10,
+            final_running_loss / (idx + 1),
             100 * final_correct / final_total,
             100
             * f1_score(
@@ -205,11 +200,7 @@ def test(net, dataset):
             ),
         )
     )
-    for i in range(num_classes):
-        print(
-            "Accuracy of %5s : %2d %%"
-            % (dataset.classes[i], 100 * class_correct[i] / class_total[i])
-        )
+    return
 
 
 def production(net, data):
