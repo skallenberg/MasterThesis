@@ -16,7 +16,6 @@ class DenseNet(BaseNet):
         num_classes=10,
         groups=1,
         width_per_group=64,
-        replace_stride_with_dilation=None,
     ):
         self.growth_rate = 32
         self.drop_rate = drop_rate
@@ -27,7 +26,6 @@ class DenseNet(BaseNet):
             num_classes,
             groups=groups,
             width_per_group=width_per_group,
-            replace_stride_with_dilation=replace_stride_with_dilation,
         )
 
         self.fc = nn.Linear(self.nfeats, self.num_classes)
@@ -37,15 +35,7 @@ class DenseNet(BaseNet):
         nfeats = self.channels_in
         hidden_layers = []
         for i in range(len(layers)):
-            hidden_layers.append(
-                self._build_unit(
-                    self.block_type,
-                    layers[i],
-                    nfeats,
-                    stride=1,
-                    dilate=self.replace_stride_with_dilation[i],
-                )
-            )
+            hidden_layers.append(self._build_unit(self.block_type, layers[i], nfeats,))
             nfeats += layers[i] * self.growth_rate * self.block_type.expansion
             if i != len(layers) - 1:
                 hidden_layers.append(self._transition(nfeats, int(nfeats / 2)))
@@ -62,12 +52,7 @@ class DenseNet(BaseNet):
         self.hidden_layers = nn.Sequential(*hidden_layers)
         return nn.Sequential(*hidden_layers)
 
-    def _build_unit(self, block_type, layer, channels, stride=1, dilate=False):
-        previous_dilation = self.dilation
-
-        if dilate:
-            self.dilation *= stride
-            stride = 1
+    def _build_unit(self, block_type, layer, channels):
 
         block = dense_block(
             block_type,
@@ -75,10 +60,8 @@ class DenseNet(BaseNet):
             channels,
             growth_rate=self.growth_rate,
             drop_rate=self.drop_rate,
-            stride=stride,
             groups=self.groups,
             base_width=self.base_width,
-            dilation=previous_dilation,
         )
         return block
 

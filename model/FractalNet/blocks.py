@@ -17,6 +17,7 @@ class fractal_path(nn.Module):
         groups=1,
         base_width=64,
         dilation=1,
+        prev_dilation=1,
         drop_path=None,
     ):
         super().__init__()
@@ -34,7 +35,7 @@ class fractal_path(nn.Module):
                 stride=stride,
                 groups=groups,
                 base_width=base_width,
-                dilation=dilation,
+                dilation=prev_dilation,
             )
         else:
             self.conv1 = block_type(
@@ -59,6 +60,7 @@ class fractal_path(nn.Module):
                     groups=groups,
                     base_width=base_width,
                     dilation=dilation,
+                    prev_dilation=prev_dilation,
                 )
             )
             fractals.append(
@@ -73,6 +75,7 @@ class fractal_path(nn.Module):
                     groups=groups,
                     base_width=base_width,
                     dilation=dilation,
+                    prev_dilation=prev_dilation,
                 )
             )
             self.path = nn.Sequential(*fractals)

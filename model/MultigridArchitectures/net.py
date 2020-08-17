@@ -8,7 +8,16 @@ from model.common import *
 
 class MNANet(nn.Module):
     def __init__(
-        self, name, block_type, layers, num_classes, residual=False, progressive=False
+        self,
+        name,
+        block_type,
+        layers,
+        num_classes,
+        residual=False,
+        progressive=False,
+        groups=1,
+        width_per_group=64,
+        rgb=False,
     ):
         super().__init__()
         self.name = name
@@ -19,7 +28,13 @@ class MNANet(nn.Module):
         self.residual = residual
         self.progressive = progressive
         self.block_type = block_type
-        self.conv0 = conv_3x3(3, self.channels_in)
+        self.groups = groups
+        self.base_width = width_per_group
+
+        if rgb:
+            self.conv0 = conv_3x3(3, self.channels_in)
+        else:
+            self.conv0 = conv_3x3(1, self.channels_in)
 
         self.bn0 = nn.BatchNorm2d(self.channels_in)
 
@@ -75,11 +90,20 @@ class MNANet(nn.Module):
         hidden_layers.append(transition())
         if self.progressive:
             hidden_layers[0] = mgconv_progressive_block(
-                self.block_type, 64, 64, downsample_identity=True, nlayers=layers[0]
+                self.block_type,
+                64,
+                64,
+                downsample_identity=True,
+                nlayers=layers[0],
+                groups=self.groups,
+                base_width=self.base_width,
             )
         return nn.Sequential(*hidden_layers)
 
-    def _build_unit(self, block_type, channels, nblocks, downsample, stride=1, size=3):
+    def _build_unit(
+        self, block_type, channels, nblocks, downsample, size=3,
+    ):
+
         layers = []
         layers.append(
             mgconv_base_block(
@@ -89,6 +113,8 @@ class MNANet(nn.Module):
                 size=size,
                 residual=self.residual,
                 downsample_identity=downsample,
+                groups=self.groups,
+                base_width=self.base_width,
             )
         )
         self.channels_in = channels * self.block_type.expansion
@@ -100,6 +126,8 @@ class MNANet(nn.Module):
                     channels_out=channels,
                     size=size,
                     residual=self.residual,
+                    groups=self.groups,
+                    base_width=self.base_width,
                 )
             )
         return nn.Sequential(*layers)

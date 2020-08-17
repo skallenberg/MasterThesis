@@ -82,7 +82,8 @@ class FractalNet(BaseNet):
             stride=stride,
             groups=self.groups,
             base_width=self.base_width,
-            dilation=previous_dilation,
+            prev_dilation=previous_dilation,
+            dilaton=self.dilation,
             drop_path=global_or_local,
         )
         return block

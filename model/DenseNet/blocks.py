@@ -9,22 +9,10 @@ class dense_base_unit(base_block):
     expansion = 1
 
     def __init__(
-        self,
-        channels_in,
-        channels_out,
-        drop_rate,
-        stride=1,
-        groups=1,
-        base_width=64,
-        dilation=1,
+        self, channels_in, channels_out, drop_rate, groups=1, base_width=64,
     ):
         super().__init__(
-            channels_in,
-            channels_out,
-            stride=stride,
-            groups=groups,
-            base_width=base_width,
-            dilation=dilation,
+            channels_in, channels_out, groups=groups, base_width=base_width,
         )
         self.drop_rate = float(drop_rate)
 
@@ -44,23 +32,14 @@ class dense_orig_bottleneck_unit(dense_base_unit):
     expansion = 4
 
     def __init__(
-        self,
-        channels_in,
-        channels_out,
-        drop_rate,
-        stride=1,
-        groups=1,
-        base_width=64,
-        dilation=1,
+        self, channels_in, channels_out, drop_rate, groups=1, base_width=64,
     ):
         super().__init__(
             channels_in,
             channels_out * self.expansion,
             drop_rate,
-            stride=stride,
             groups=groups,
             base_width=base_width,
-            dilation=dilation,
         )
 
 
@@ -68,19 +47,11 @@ class dense_alternative_bottleneck_unit(bottleneck_block):
     expansion = 4
 
     def __init__(
-        self,
-        channels_in,
-        channels_out,
-        drop_rate,
-        stride=1,
-        groups=1,
-        base_width=64,
-        dilation=1,
+        self, channels_in, channels_out, drop_rate, groups=1, base_width=64,
     ):
         super().__init__(
             channels_in,
             channels_out,
-            stride=stride,
             groups=groups,
             base_width=base_width,
             dilation=dilation,
@@ -106,20 +77,16 @@ class dense_block(nn.ModuleDict):
         channels_in,
         growth_rate,
         drop_rate,
-        stride=1,
         groups=1,
         base_width=64,
-        dilation=1,
     ):
         super().__init__()
         layer = block_type(
             channels_in=channels_in,
             channels_out=growth_rate,
             drop_rate=drop_rate,
-            stride=stride,
             groups=groups,
             base_width=base_width,
-            dilation=dilation,
         )
         self.add_module("denseblock_1", layer)
         for i in range(1, nlayers):
@@ -129,7 +96,6 @@ class dense_block(nn.ModuleDict):
                 drop_rate=drop_rate,
                 groups=groups,
                 base_width=base_width,
-                dilation=dilation,
             )
             self.add_module("denseblock_%d" % (i + 1), layer)
 

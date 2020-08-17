@@ -14,7 +14,6 @@ class mgconv_progressive_block(nn.Module):
         stride=1,
         groups=1,
         base_width=64,
-        dilation=1,
         residual=False,
         downsample_identity=False,
         nlayers=2,
@@ -31,11 +30,12 @@ class mgconv_progressive_block(nn.Module):
         self.block_type = block_type
         self.channels_in = channels_in
         self.channels_out = channels_out
+        self.groups = groups
+        self.base_width = base_width
 
-        if groups != 1 or base_width != 64:
-            raise ValueError("base_block only supports groups=1 and base_width=64")
-        if dilation > 1:
-            raise NotImplementedError("Dilation > 1 not supported in base_block")
+        if self.block_type.expansion == 1:
+            if groups != 1 or base_width != 64:
+                raise ValueError("base_block only supports groups=1 and base_width=64")
 
         inital_conv = nn.ModuleList()
         ch_in = self.channels_in
@@ -97,17 +97,37 @@ class mgconv_progressive_block(nn.Module):
         if size == 3:
             mgconv_path.append(self.block_type(int(channels_in * 1.5), channels_out))
             mgconv_path.append(
-                self.block_type(int(channels_in * 1.75), channels_out // 2)
+                self.block_type(
+                    channels_in=int(channels_in * 1.75),
+                    channels_out=channels_out // 2,
+                    groups=self.groups,
+                    base_width=self.base_width,
+                )
             )
             mgconv_path.append(
-                self.block_type(int(channels_in * 0.75), channels_out // 4)
+                self.block_type(
+                    channels_in=int(channels_in * 0.75),
+                    channels_out=channels_out // 4,
+                    groups=self.groups,
+                    base_width=self.base_width,
+                )
             )
         elif size == 2:
             mgconv_path.append(
-                self.block_type(int(channels_in * 0.75), int(channels_out * 0.5))
+                self.block_type(
+                    channels_in=int(channels_in * 0.75),
+                    channels_out=int(channels_out * 0.5),
+                    groups=self.groups,
+                    base_width=self.base_width,
+                )
             )
             mgconv_path.append(
-                self.block_type(int(channels_in * 0.75), int(channels_out * 0.25))
+                self.block_type(
+                    channels_in=int(channels_in * 0.75),
+                    channels_out=int(channels_out * 0.25),
+                    groups=self.groups,
+                    base_width=self.base_width,
+                )
             )
         return mgconv_path
 
@@ -195,7 +215,6 @@ class mgconv_base_block(nn.Module):
         stride=1,
         groups=1,
         base_width=64,
-        dilation=1,
         size=3,
         residual=False,
         downsample_identity=False,
@@ -212,11 +231,12 @@ class mgconv_base_block(nn.Module):
         self.block_type = block_type
         self.channels_in = channels_in
         self.channels_out = channels_out
+        self.groups = groups
+        self.base_width = base_width
 
-        if groups != 1 or base_width != 64:
-            raise ValueError("base_block only supports groups=1 and base_width=64")
-        if dilation > 1:
-            raise NotImplementedError("Dilation > 1 not supported in base_block")
+        if self.block_type.expansion == 1:
+            if groups != 1 or base_width != 64:
+                raise ValueError("base_block only supports groups=1 and base_width=64")
 
         self.mgconv_path_1 = self._make_mg_path(
             self.channels_in, self.channels_out, size=self.size
@@ -271,15 +291,37 @@ class mgconv_base_block(nn.Module):
         if self.size == 3:
             mgconv_path.append(self.block_type(int(channels_in * 1.5), channels_out))
             mgconv_path.append(
-                self.block_type(int(channels_in * 1.75), channels_out // 2)
+                self.block_type(
+                    int(channels_in * 1.75),
+                    channels_out // 2,
+                    groups=self.groups,
+                    base_width=self.base_width,
+                )
             )
             mgconv_path.append(
-                self.block_type(int(channels_in * 0.75), channels_out // 4)
+                self.block_type(
+                    int(channels_in * 0.75),
+                    channels_out // 4,
+                    groups=self.groups,
+                    base_width=self.base_width,
+                )
             )
         elif self.size == 2:
-            mgconv_path.append(self.block_type(int(channels_in * 1.75), channels_out))
             mgconv_path.append(
-                self.block_type(int(channels_in * 1.75), int(channels_out * 0.75))
+                self.block_type(
+                    int(channels_in * 1.75),
+                    channels_out,
+                    groups=self.groups,
+                    base_width=self.base_width,
+                )
+            )
+            mgconv_path.append(
+                self.block_type(
+                    int(channels_in * 1.75),
+                    int(channels_out * 0.75),
+                    groups=self.groups,
+                    base_width=self.base_width,
+                )
             )
         return mgconv_path
 
