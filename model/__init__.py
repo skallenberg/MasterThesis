@@ -5,3 +5,4 @@ from .FractalNet import *
 from .NetworkInNetwork import *
 from .MultilevelResiduals import *
 from .MultigridArchitectures import *
+from .InceptionNet import *
