@@ -3,6 +3,7 @@ import logging
 import torch
 import torch.nn as nn
 
+import ignite_training
 import mode
 from utils import load_data
 from utils import set_config
@@ -41,13 +42,13 @@ logging.info("Initialized Network")
 
 # visualize.make_graph(net)
 
-net = mode.train(net, data)
+net = ignite_training.train(net, data)
 
 logging.info("Finished Training")
 
 # utils.visualize.show(data, nimages=4, net=net)
 
-mode.test(net, data)
+# mode.test(net, data)
 
 logging.info("Finished Testing")
 logging.info("Run succesfull")

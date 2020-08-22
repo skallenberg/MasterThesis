@@ -60,6 +60,7 @@ def train(net, dataset):
         "F1-Score": metrics.Fbeta(beta=1.0),
         "Confusion Matrix": metrics.ConfusionMatrix(num_classes=len(dataset.classes)),
     }
+
     train_evaluator = create_supervised_evaluator(net, metrics=val_metrics, device=device)
     test_evaluator = create_supervised_evaluator(net, metrics=val_metrics, device=device)
 
@@ -90,20 +91,18 @@ def train(net, dataset):
     )
 
     tb_logger.attach(
-        trainer, event_name=Events.ITERATION_COMPLETED, log_handler=WeightsScalarHandler(model),
+        trainer, event_name=Events.ITERATION_COMPLETED, log_handler=WeightsScalarHandler(net),
     )
 
     tb_logger.attach(
-        trainer, event_name=Events.EPOCH_COMPLETED, log_handler=WeightsHistHandler(model),
+        trainer, event_name=Events.EPOCH_COMPLETED, log_handler=WeightsHistHandler(net),
     )
 
     tb_logger.attach(
-        trainer, event_name=Events.ITERATION_COMPLETED, log_handler=GradsScalarHandler(model),
+        trainer, event_name=Events.ITERATION_COMPLETED, log_handler=GradsScalarHandler(net),
     )
 
-    tb_logger.attach(
-        trainer, event_name=Events.EPOCH_COMPLETED, log_handler=GradsHistHandler(model)
-    )
+    tb_logger.attach(trainer, event_name=Events.EPOCH_COMPLETED, log_handler=GradsHistHandler(net))
 
     @trainer.on(Events.ITERATION_COMPLETED(every=config["Trainer"]["log_interval"]))
     def log_training_metrics(engine):
