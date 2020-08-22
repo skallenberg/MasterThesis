@@ -2,6 +2,8 @@ import torch
 import torch.functional as F
 import torch.nn as nn
 
+from model.common import *
+
 
 class interpolate(nn.Module):
     def __init__(self, channels_in=None, scale=None, mode="nearest"):

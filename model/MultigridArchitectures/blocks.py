@@ -23,8 +23,8 @@ class mgconv_progressive_block(nn.Module):
         super().__init__()
         self.stride = 1
         self.maxpool = nn.MaxPool2d(2, stride=1, padding=1)
-        self.upsample = _interpolate(scale=2)
-        self.downsample = _interpolate(scale=0.5)
+        self.upsample = interpolate(scale=2)
+        self.downsample = interpolate(scale=0.5)
         self.downsample_identity = downsample_identity
         self.downsample_list = None
         self.nlayers = nlayers
@@ -214,8 +214,8 @@ class mgconv_base_block(nn.Module):
         super().__init__()
         self.stride = 1
         self.maxpool = nn.MaxPool2d(2, stride=1, padding=1)
-        self.upsample = _interpolate(scale=2)
-        self.downsample = _interpolate(scale=0.5)
+        self.upsample = interpolate(scale=2)
+        self.downsample = interpolate(scale=0.5)
         self.downsample_identity = downsample_identity
         self.downsample_list = None
         self.size = size

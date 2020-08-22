@@ -16,18 +16,14 @@ config = Config.get_instance()
 criterion = nn.CrossEntropyLoss()
 
 if torch.cuda.is_available():
-    device = torch.device(config["Setup"]["Device"])
-    if torch.cuda.device_count() > 1:
-        config["Setup"]["Parallel"] = 1
-    else:
-        config["Setup"]["Parallel"] = 0
+    device = torch.device("cuda:0")
 else:
     device = torch.device("cpu")
 
 
 def train(net, dataset, return_data=False):
 
-    if config["Setup"]["Parallel"] == 1:
+    if torch.cuda.device_count() > 1:
         writer_name = (
             net.module.name
             + "_"
@@ -168,7 +164,7 @@ def train(net, dataset, return_data=False):
 
 def test(net, dataset, return_data=False):
 
-    if config["Setup"]["Parallel"] == 1:
+    if torch.cuda.device_count() > 1:
         writer = SummaryWriter("./data/models/log/runs/" + net.module.writer + "/test")
     else:
         writer = SummaryWriter("./data/models/log/runs/" + net.writer + "/test")

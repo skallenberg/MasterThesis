@@ -1,4 +1,5 @@
 import multiprocessing
+import os
 
 import torch
 import torchvision
@@ -13,6 +14,14 @@ data_name = config["Setup"]["Data"]
 global worker_count
 # worker_count = multiprocessing.cpu_count()
 worker_count = torch.cuda.device_count() * 4
+
+gpu_path = "/data/skallenberg/datasets"
+local_path = "./data/datasets"
+
+if os.path.isdir(gpu_path):
+    data_path = gpu_path
+else:
+    data_path = local_path
 
 
 class dataset:
@@ -44,11 +53,11 @@ def get_data(augment=False):
             [transforms.ToTensor(), transforms.Normalize(mean, std),]
         )
         trainset = torchvision.datasets.MNIST(
-            root="./data/datasets", train=True, download=True, transform=tr_transform,
+            data_path, train=True, download=True, transform=tr_transform,
         )
 
         testset = torchvision.datasets.MNIST(
-            root="./data/datasets", train=False, download=True, transform=val_transform,
+            data_path, train=False, download=True, transform=val_transform,
         )
         classes = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
     if data_name == "svhn":
@@ -71,11 +80,11 @@ def get_data(augment=False):
             [transforms.ToTensor(), transforms.Normalize(mean, std),]
         )
         trainset = torchvision.datasets.SVHN(
-            root="./data/datasets", train=True, download=True, transform=tr_transform,
+            data_path, train=True, download=True, transform=tr_transform,
         )
 
         testset = torchvision.datasets.SVHN(
-            root="./data/datasets", train=False, download=True, transform=val_transform,
+            data_path, train=False, download=True, transform=val_transform,
         )
         classes = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
 
@@ -100,11 +109,11 @@ def get_data(augment=False):
             [transforms.ToTensor(), transforms.Normalize(mean, std),]
         )
         trainset = torchvision.datasets.CIFAR10(
-            root="./data/datasets", train=True, download=True, transform=tr_transform
+            data_path, train=True, download=True, transform=tr_transform
         )
 
         testset = torchvision.datasets.CIFAR10(
-            root="./data/datasets", train=False, download=True, transform=val_transform
+            data_path, train=False, download=True, transform=val_transform
         )
 
         classes = (
@@ -141,11 +150,11 @@ def get_data(augment=False):
         )
 
         trainset = torchvision.datasets.CIFAR100(
-            root="./data/datasets", train=True, download=True, transform=tr_transform
+            data_path, train=True, download=True, transform=tr_transform
         )
 
         testset = torchvision.datasets.CIFAR100(
-            root="./data/datasets", train=False, download=True, transform=val_transform
+            data_path, train=False, download=True, transform=val_transform
         )
 
         classes = (

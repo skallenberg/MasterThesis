@@ -2,12 +2,18 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from utils.config import Config
 
-def initial_conv(channels_in, rgb=True):
-    if rgb:
-        input_dim = 3
-    else:
+config = Config.get_instance()
+
+data_name = config["Setup"]["Data"]
+
+
+def initial_conv(channels_in):
+    if data_name == "mnist":
         input_dim = 1
+    else:
+        input_dim = 3
     return nn.Conv2d(input_dim, channels_in, kernel_size=7, stride=2, padding=3, bias=False)
 
 

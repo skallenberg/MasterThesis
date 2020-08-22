@@ -41,7 +41,7 @@ class BaseNet(nn.Module):
         self.base_width = width_per_group
         self.block_type = block_type
         self.channels_in = 64
-        self.conv0 = initial_conv(self.channels_in, rgb=rgb)
+        self.conv0 = initial_conv(self.channels_in)
         self.bn0 = nn.BatchNorm2d(self.channels_in)
         self.activation0 = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)

@@ -3,7 +3,7 @@ from .net import BaseNet
 
 
 def _basenet(name, block_type, layers, num_classes=10):
-    model = BaseNet(name, block_type, layers, num_classes)
+    model = BaseNet(name=name, block_type=block_type, layers=layers, num_classes=num_classes)
     return model
 
 

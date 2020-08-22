@@ -51,7 +51,7 @@ class dense_alternative_bottleneck_unit(bottleneck_block):
         self, channels_in, channels_out, drop_rate, groups=1, base_width=64,
     ):
         super().__init__(
-            channels_in, channels_out, groups=groups, base_width=base_width, dilation=dilation,
+            channels_in, channels_out, groups=groups, base_width=base_width,
         )
 
         self.drop_rate = float(drop_rate)

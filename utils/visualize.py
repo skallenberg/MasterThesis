@@ -14,7 +14,7 @@ config = Config.get_instance()
 # matplotlib.use("Qt5Agg")
 
 if torch.cuda.is_available():
-    device = torch.device(config["Setup"]["Device"])
+    device = torch.device("cuda:0")
 else:
     device = torch.device("cpu")
 

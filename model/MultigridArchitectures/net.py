@@ -7,6 +7,12 @@ from model.common import *
 from .blocks import *
 from .utils import *
 
+from utils.config import Config
+
+config = Config.get_instance()
+
+data_name = config["Setup"]["Data"]
+
 
 class MNANet(nn.Module):
     def __init__(
@@ -19,7 +25,6 @@ class MNANet(nn.Module):
         progressive=False,
         groups=1,
         width_per_group=64,
-        rgb=False,
     ):
         super().__init__()
         self.name = name
@@ -33,10 +38,12 @@ class MNANet(nn.Module):
         self.groups = groups
         self.base_width = width_per_group
 
-        if rgb:
-            self.conv0 = conv_3x3(3, self.channels_in)
-        else:
+        rgb = True
+
+        if data_name == "mnist":
             self.conv0 = conv_3x3(1, self.channels_in)
+        else:
+            self.conv0 = conv_3x3(3, self.channels_in)
 
         self.bn0 = nn.BatchNorm2d(self.channels_in)
 

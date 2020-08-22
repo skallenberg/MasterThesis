@@ -86,7 +86,6 @@ def _set_net():
     model = set_config.choose_architecture()
     if running_mode == 1 and torch.cuda.is_available():
         model = nn.DistributedDataParallel(model)
-        config["Setup"]["Parallel"] = 1
     return model.to(device)
 
 
