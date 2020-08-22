@@ -8,9 +8,7 @@ def initial_conv(channels_in, rgb=True):
         input_dim = 3
     else:
         input_dim = 1
-    return nn.Conv2d(
-        input_dim, channels_in, kernel_size=7, stride=2, padding=3, bias=False
-    )
+    return nn.Conv2d(input_dim, channels_in, kernel_size=7, stride=2, padding=3, bias=False)
 
 
 def conv_3x3(channels_in, channels_out, stride=1, groups=1, dilation=1):

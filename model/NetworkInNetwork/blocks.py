@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from model.common import *
+
 from model.BaseNet.blocks import *
+from model.common import *
 
 global mlp_layers
 mlp_layers = 2
@@ -70,9 +71,7 @@ class NiN_bottleneck_block(bottleneck_block):
         for i in range(mlp_layers):
             MLPconv.append(
                 nn.Conv2d(
-                    channels_out * self.expansion,
-                    channels_out * self.expansion,
-                    kernel_size=1,
+                    channels_out * self.expansion, channels_out * self.expansion, kernel_size=1,
                 )
             )
         self.MLPconv = nn.Sequential(*MLPconv)

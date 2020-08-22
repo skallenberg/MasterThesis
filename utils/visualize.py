@@ -1,12 +1,13 @@
-import numpy as np
-import torchvision
-import torch
 import matplotlib
 import matplotlib.pyplot as plt
-from utils.config import Config
+import numpy as np
+import torch
 import torch.nn.functional as F
+import torchvision
 from torch.utils.tensorboard import SummaryWriter
+
 from utils import load_data
+from utils.config import Config
 
 config = Config.get_instance()
 
@@ -114,4 +115,3 @@ def make_graph(net):
     images, labels = images.to(device), labels.to(device)
 
     writer.add_graph(net, images)
-

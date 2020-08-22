@@ -1,5 +1,6 @@
-from .net import MRNNet
 from model.ResNet.blocks import *
+
+from .net import MRNNet
 
 
 def _mrn_net(name, block_type, layers, num_classes=10, **kwargs):
@@ -31,6 +32,4 @@ def MRN_NeXt50(**kwargs):
 
 def MRN_WideResNet50(**kwargs):
     kwargs["width_per_group"] = 64 * 2
-    return _mrn_net(
-        "MRN_WideResNet50", residual_bottleneck_block, [3, 4, 6, 3], **kwargs
-    )
+    return _mrn_net("MRN_WideResNet50", residual_bottleneck_block, [3, 4, 6, 3], **kwargs)

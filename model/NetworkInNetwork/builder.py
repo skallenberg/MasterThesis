@@ -1,5 +1,5 @@
-from .net import NiN_Net
 from .blocks import *
+from .net import NiN_Net
 
 
 def _NiN_Net(name, block_type, layers, num_classes=10):

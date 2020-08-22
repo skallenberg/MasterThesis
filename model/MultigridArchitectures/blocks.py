@@ -1,7 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 from model.common import *
+
 from .utils import *
 
 
@@ -53,9 +55,7 @@ class mgconv_progressive_block(nn.Module):
         for i in range(self.nlayers):
             self.mg_conv_path_1.append(
                 self._make_mg_path(
-                    self.channels_out * self.block_type.expansion,
-                    self.channels_out,
-                    size=2,
+                    self.channels_out * self.block_type.expansion, self.channels_out, size=2,
                 )
             )
 
@@ -63,9 +63,7 @@ class mgconv_progressive_block(nn.Module):
         for i in range(self.nlayers):
             self.mg_conv_path_2.append(
                 self._make_mg_path(
-                    self.channels_out * self.block_type.expansion,
-                    self.channels_out,
-                    size=3,
+                    self.channels_out * self.block_type.expansion, self.channels_out, size=3,
                 )
             )
 
@@ -78,16 +76,10 @@ class mgconv_progressive_block(nn.Module):
             conv_1x1(self.channels_in, self.channels_out * self.block_type.expansion)
         )
         downsamples.append(
-            conv_1x1(
-                self.channels_in // 2,
-                self.channels_out // 2 * self.block_type.expansion,
-            )
+            conv_1x1(self.channels_in // 2, self.channels_out // 2 * self.block_type.expansion,)
         )
         downsamples.append(
-            conv_1x1(
-                self.channels_in // 4,
-                self.channels_out // 4 * self.block_type.expansion,
-            )
+            conv_1x1(self.channels_in // 4, self.channels_out // 4 * self.block_type.expansion,)
         )
 
         return downsamples
@@ -243,9 +235,7 @@ class mgconv_base_block(nn.Module):
         )
 
         self.mgconv_path_2 = self._make_mg_path(
-            self.channels_out * self.block_type.expansion,
-            self.channels_out,
-            size=self.size,
+            self.channels_out * self.block_type.expansion, self.channels_out, size=self.size,
         )
 
         if self.downsample_identity:
@@ -255,28 +245,21 @@ class mgconv_base_block(nn.Module):
         downsamples = nn.ModuleList()
         if self.size == 3:
             downsamples.append(
+                conv_1x1(self.channels_in, self.channels_out * self.block_type.expansion)
+            )
+            downsamples.append(
                 conv_1x1(
-                    self.channels_in, self.channels_out * self.block_type.expansion
+                    self.channels_in // 2, self.channels_out // 2 * self.block_type.expansion,
                 )
             )
             downsamples.append(
                 conv_1x1(
-                    self.channels_in // 2,
-                    self.channels_out // 2 * self.block_type.expansion,
-                )
-            )
-            downsamples.append(
-                conv_1x1(
-                    self.channels_in // 4,
-                    self.channels_out // 4 * self.block_type.expansion,
+                    self.channels_in // 4, self.channels_out // 4 * self.block_type.expansion,
                 )
             )
         elif self.size == 2:
             downsamples.append(
-                conv_1x1(
-                    int(self.channels_in),
-                    self.channels_out * self.block_type.expansion,
-                )
+                conv_1x1(int(self.channels_in), self.channels_out * self.block_type.expansion,)
             )
             downsamples.append(
                 conv_1x1(

@@ -1,13 +1,16 @@
+import logging
+import time
+from datetime import datetime
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from utils.config import Config
 from sklearn.metrics import f1_score
-import logging
-from utils import visualize, set_config
-from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
-import time
+
+from utils import set_config
+from utils import visualize
+from utils.config import Config
 
 config = Config.get_instance()
 criterion = nn.CrossEntropyLoss()
@@ -37,11 +40,7 @@ def train(net, dataset, return_data=False):
         net.module.writer = writer_name
     else:
         writer_name = (
-            net.name
-            + "_"
-            + dataset.name
-            + "_"
-            + datetime.now().strftime("%m-%d-%Y-%H:%M:%S")
+            net.name + "_" + dataset.name + "_" + datetime.now().strftime("%m-%d-%Y-%H:%M:%S")
         )
         writer = SummaryWriter("./data/models/log/runs/" + writer_name + "/train")
 
@@ -60,6 +59,8 @@ def train(net, dataset, return_data=False):
 
     _epoch_process_time = 0
 
+    avg_loss_window = []
+
     for epoch in range(config["Setup"]["Epochs"]):
 
         running_loss = 0.0
@@ -71,6 +72,7 @@ def train(net, dataset, return_data=False):
         _epoch_start = time.time()
 
         for i, data in enumerate(dataset.trainloader):
+            iteration = epoch * len(list(dataset.trainloader)) + i
             optimizer.zero_grad()
 
             inputs, labels = data
@@ -82,22 +84,33 @@ def train(net, dataset, return_data=False):
             loss.backward()
             optimizer.step()
 
-            running_loss += loss.item()
+            curr_loss = loss.item()
+
+            del loss
+
+            running_loss += curr_loss
+            avg_loss_window.append(curr_loss)
+            if len(avg_loss_window) > 999:
+                del avg_loss_window[0]
 
             _, predicted = torch.max(outputs.data, 1)
 
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-            if i % 100 == 99:
-                loss_avg = running_loss / 100
+            if iteration % 1000 == 999:
+                loss_avg = running_loss / iteration
+                loss_window = sum(avg_loss_window) / 1000
                 acc = 100 * correct / total
                 iteration = epoch * len(list(dataset.trainloader)) + i
                 writer.add_scalar(
-                    "Loss/Train", loss_avg, iteration,
+                    "Average Cumulated Loss/Train", loss_avg, iteration,
+                )
+                writer.add_scalar(
+                    "Average Loss Window/Train", loss_window, iteration,
                 )
                 writer.add_scalar("Accuracy/Train", acc, iteration)
-                logging.info("Loss:\t%.4f\tAcc:\t%.4f" % (loss_avg, acc))
+                logging.info("Average Loss:\t%.4f\tAcc:\t%.4f" % (loss_avg, acc))
                 iter_list.append(iteration)
                 loss_list.append(loss_avg)
                 accuracy_list.append(acc)
@@ -121,8 +134,7 @@ def train(net, dataset, return_data=False):
     _global_process_time = _global_end - _global_start
 
     logging.info(
-        "Average time for each epoch:\t%8.8f"
-        % (_epoch_process_time / config["Setup"]["Epochs"])
+        "Average time for each epoch:\t%8.8f" % (_epoch_process_time / config["Setup"]["Epochs"])
     )
     logging.info("Time needed for training:\t%8.8f" % (_global_process_time))
     if config["Setup"]["Parallel"] == 1:
@@ -194,9 +206,7 @@ def test(net, dataset, return_data=False):
             100 * final_correct / final_total,
             100
             * f1_score(
-                y_true=final_cumulated_labels,
-                y_pred=final_cumulated_predictions,
-                average="macro",
+                y_true=final_cumulated_labels, y_pred=final_cumulated_predictions, average="macro",
             ),
         )
     )

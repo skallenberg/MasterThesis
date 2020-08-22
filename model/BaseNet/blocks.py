@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 from model.common import *
 
 
@@ -42,17 +43,13 @@ class base_block(nn.Module):
 class bottleneck_block(nn.Module):
     expansion = 4
 
-    def __init__(
-        self, channels_in, channels_out, stride=1, groups=1, base_width=64, dilation=1
-    ):
+    def __init__(self, channels_in, channels_out, stride=1, groups=1, base_width=64, dilation=1):
         super().__init__()
         width = int(channels_out * (base_width / 64.0)) * groups
         self.bn1 = nn.BatchNorm2d(channels_in)
         self.conv1 = conv_1x1(channels_in, width)
         self.bn2 = nn.BatchNorm2d(width)
-        self.conv2 = conv_3x3(
-            width, width, stride=stride, groups=groups, dilation=dilation
-        )
+        self.conv2 = conv_3x3(width, width, stride=stride, groups=groups, dilation=dilation)
         self.bn3 = nn.BatchNorm2d(width)
         self.conv3 = conv_1x1(width, channels_out * self.expansion)
         self.activation1 = nn.ReLU(inplace=True)

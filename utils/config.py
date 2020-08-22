@@ -32,14 +32,10 @@ class Config(collections.MutableMapping):
                 template = toml.parse(f.read())
 
             if "Version" not in self:
-                raise RuntimeError(
-                    f"The attribute 'version' is missing in '{self._file}'."
-                )
+                raise RuntimeError(f"The attribute 'version' is missing in '{self._file}'.")
 
             if "Version" not in template:
-                raise RuntimeError(
-                    f"The attribute 'version' is missing in '{self._template}'."
-                )
+                raise RuntimeError(f"The attribute 'version' is missing in '{self._template}'.")
 
             self_version = version.parse(str(self["Version"]))
             template_version = version.parse(str(template["Version"]))

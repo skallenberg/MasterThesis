@@ -1,5 +1,5 @@
-from .net import DenseNet
 from .blocks import *
+from .net import DenseNet
 
 
 def _densenet(name, block_type, layers, num_classes=10):

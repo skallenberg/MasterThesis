@@ -1,10 +1,9 @@
-from .net import FractalNet
 from model.BaseNet.blocks import *
 
+from .net import FractalNet
 
-def _fractal_net(
-    name, block_type, layers, fractal_expansion=4, num_classes=10, drop_path=False
-):
+
+def _fractal_net(name, block_type, layers, fractal_expansion=4, num_classes=10, drop_path=False):
     model = FractalNet(
         name,
         block_type,

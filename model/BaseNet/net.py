@@ -1,8 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .blocks import *
+
 from model.common import *
+
+from .blocks import *
 
 
 class BaseNet(nn.Module):
@@ -48,9 +50,7 @@ class BaseNet(nn.Module):
         self.hidden_layers = self._build_layers(self.layer_set)
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(
-            self.block_type.expansion * 64 * (2 ** (len(layers) - 1)), num_classes
-        )
+        self.fc = nn.Linear(self.block_type.expansion * 64 * (2 ** (len(layers) - 1)), num_classes)
 
         self._init_modules()
 

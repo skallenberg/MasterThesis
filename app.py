@@ -1,16 +1,23 @@
-import streamlit as st
-import numpy as np
-import torch
-import torchvision
-import pandas as pd
-import mode
-from utils.config import Config
-from utils import load_data, set_config, visualize
 import os
 import random
 from collections import OrderedDict
-from PIL import Image
+
+import numpy as np
+import pandas as pd
+import streamlit as st
+import torch
+import torchvision
 import torchvision.transforms as transforms
+from PIL import Image
+
+import mode
+from utils import load_data
+from utils import set_config
+from utils import visualize
+from utils.config import Config
+
+torch.backends.cudnn.enabled = True
+torch.backends.cudnn.benchmark = True
 
 st.set_option("deprecation.showfileUploaderEncoding", False)
 
@@ -29,15 +36,7 @@ train_or_test = st.sidebar.selectbox(
 
 model_option = st.sidebar.selectbox(
     "Choose Model to apply",
-    [
-        "BaseNet34",
-        "ResNet34",
-        "DenseNet34",
-        "FractalNet4",
-        "NiN_Net34",
-        "RoR_NeXt50",
-        "MG16",
-    ],
+    ["BaseNet34", "ResNet34", "DenseNet34", "FractalNet4", "NiN_Net34", "RoR_NeXt50", "MG16",],
 )
 
 config["Setup"]["Architecture"] = model_option
@@ -86,7 +85,7 @@ def _load_dataset():
 def _set_net():
     model = set_config.choose_architecture()
     if running_mode == 1 and torch.cuda.is_available():
-        model = nn.DataParallel(model)
+        model = nn.DistributedDataParallel(model)
         config["Setup"]["Parallel"] = 1
     return model.to(device)
 
@@ -172,9 +171,7 @@ else:
 
         classes = data.classes
 
-        st.write(
-            "GroundTruth: \t", "\t".join("%5s" % classes[labels[j]] for j in range(4))
-        )
+        st.write("GroundTruth: \t", "\t".join("%5s" % classes[labels[j]] for j in range(4)))
 
         net = _load_net_from_file()
 
@@ -182,9 +179,7 @@ else:
 
         _, predicted = torch.max(outputs, 1)
 
-        st.write(
-            "Predicted: \t", "\t".join("%5s" % classes[predicted[j]] for j in range(4))
-        )
+        st.write("Predicted: \t", "\t".join("%5s" % classes[predicted[j]] for j in range(4)))
 
     if st.button("Upload Image to classify"):
         data = _load_dataset()
@@ -194,9 +189,7 @@ else:
         st.image(image, caption="Uploaded Image", use_column_width=True)
         st.write("")
         st.write("Classifying...")
-        loader = transforms.Compose(
-            [transforms.Resize((32, 32)), transforms.ToTensor()]
-        )
+        loader = transforms.Compose([transforms.Resize((32, 32)), transforms.ToTensor()])
         image = loader(image).float()
         image = image.unsqueeze(0)
         net = _load_net_from_file()
@@ -205,4 +198,3 @@ else:
         _, predicted = torch.max(outputs, 1)
         classes = data.classes
         st.write(classes[predicted])
-

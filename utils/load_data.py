@@ -1,8 +1,10 @@
+import multiprocessing
+
 import torch
 import torchvision
 import torchvision.transforms as transforms
+
 from utils.config import Config
-import multiprocessing
 
 config = Config.get_instance()
 
@@ -10,7 +12,7 @@ data_name = config["Setup"]["Data"]
 
 global worker_count
 # worker_count = multiprocessing.cpu_count()
-worker_count = 3
+worker_count = torch.cuda.device_count() * 4
 
 
 class dataset:
@@ -253,16 +255,16 @@ def get_data(augment=False):
         trainset,
         batch_size=config["DataLoader"]["TrainSize"],
         shuffle=True,
-        num_workers=config["DataLoader"]["Num_Workers"],
-        pin_memory=config["DataLoader"]["Pin_Memory"],
-        drop_last=config["DataLoader"]["Drop_Last"],
+        num_workers=worker_count,
+        pin_memory=True,
+        drop_last=True,
     )
     testloader = torch.utils.data.DataLoader(
         testset,
         batch_size=config["DataLoader"]["TestSize"],
         shuffle=False,
-        pin_memory=config["DataLoader"]["Pin_Memory"],
-        drop_last=config["DataLoader"]["Drop_Last"],
-        num_workers=config["DataLoader"]["Num_Workers"],
+        num_workers=worker_count,
+        pin_memory=True,
+        drop_last=True,
     )
     return dataset(data_name, trainloader, testloader, classes)

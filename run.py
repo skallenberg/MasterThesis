@@ -1,9 +1,16 @@
-from utils import load_data, set_config, visualize
-from utils.config import Config
-import mode
+import logging
+
 import torch
 import torch.nn as nn
-import logging
+
+import mode
+from utils import load_data
+from utils import set_config
+from utils import visualize
+from utils.config import Config
+
+torch.backends.cudnn.enabled = True
+torch.backends.cudnn.benchmark = True
 
 config = Config.get_instance()
 
@@ -23,11 +30,10 @@ else:
 net = set_config.choose_architecture()
 
 if torch.cuda.device_count() > 1:
-    net = nn.DataParallel(net)
+    net = nn.DistributedDataParallel(net)
     config["Setup"]["Parallel"] = 1
 else:
     config["Setup"]["Parallel"] = 0
-
 net = net.to(device)
 
 
@@ -45,4 +51,3 @@ mode.test(net, data)
 
 logging.info("Finished Testing")
 logging.info("Run succesfull")
-

@@ -1,6 +1,6 @@
 import torch
-import torch.nn as nn
 import torch.functional as F
+import torch.nn as nn
 
 
 class interpolate(nn.Module):
@@ -12,8 +12,7 @@ class interpolate(nn.Module):
         self.channels_in = channels_in
         if self.channels_in:
             self.conv = conv_1x1(
-                channels_in=self.channels_in,
-                channels_out=int(self.channels_in * self.scale),
+                channels_in=self.channels_in, channels_out=int(self.channels_in * self.scale),
             )
 
     def forward(self, x):
@@ -37,9 +36,7 @@ class transition(nn.Module):
         for idx, input in enumerate(x):
             if idx < (len(x) - 1):
                 if int(list(x[idx + 1].size())[2]) == 1 and (idx + 1) == (len(x) - 1):
-                    result.append(
-                        torch.cat((self.subsample(self.pool(x[idx])), x[idx + 1]), 1)
-                    )
+                    result.append(torch.cat((self.subsample(self.pool(x[idx])), x[idx + 1]), 1))
                     break
                 else:
                     result.append(self.subsample(self.pool(x[idx])))

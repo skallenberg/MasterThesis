@@ -1,6 +1,7 @@
 import torch.optim as optim
-from utils.config import Config
+
 from model import *
+from utils.config import Config
 
 config = Config.get_instance()
 
@@ -39,4 +40,3 @@ def choose_architecture():
         return eval(arch + "()")
     except:
         raise ValueError("Model not yet implemented")
-

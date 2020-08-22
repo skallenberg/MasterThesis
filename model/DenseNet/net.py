@@ -1,31 +1,21 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .blocks import *
-from model.common import *
+
 from model.BaseNet.net import BaseNet
+from model.common import *
+
+from .blocks import *
 
 
 class DenseNet(BaseNet):
     def __init__(
-        self,
-        name,
-        block_type,
-        layers,
-        drop_rate=0,
-        num_classes=10,
-        groups=1,
-        width_per_group=64,
+        self, name, block_type, layers, drop_rate=0, num_classes=10, groups=1, width_per_group=64,
     ):
         self.growth_rate = 32
         self.drop_rate = drop_rate
         super().__init__(
-            name,
-            block_type,
-            layers,
-            num_classes,
-            groups=groups,
-            width_per_group=width_per_group,
+            name, block_type, layers, num_classes, groups=groups, width_per_group=width_per_group,
         )
 
         self.fc = nn.Linear(self.nfeats, self.num_classes)

@@ -1,5 +1,5 @@
-from .net import BaseNet
 from .blocks import *
+from .net import BaseNet
 
 
 def _basenet(name, block_type, layers, num_classes=10):

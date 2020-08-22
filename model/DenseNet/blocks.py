@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from model.common import *
+
 from model.BaseNet.blocks import *
+from model.common import *
 
 
 class dense_base_unit(base_block):
@@ -50,11 +51,7 @@ class dense_alternative_bottleneck_unit(bottleneck_block):
         self, channels_in, channels_out, drop_rate, groups=1, base_width=64,
     ):
         super().__init__(
-            channels_in,
-            channels_out,
-            groups=groups,
-            base_width=base_width,
-            dilation=dilation,
+            channels_in, channels_out, groups=groups, base_width=base_width, dilation=dilation,
         )
 
         self.drop_rate = float(drop_rate)
@@ -71,14 +68,7 @@ class dense_alternative_bottleneck_unit(bottleneck_block):
 
 class dense_block(nn.ModuleDict):
     def __init__(
-        self,
-        block_type,
-        nlayers,
-        channels_in,
-        growth_rate,
-        drop_rate,
-        groups=1,
-        base_width=64,
+        self, block_type, nlayers, channels_in, growth_rate, drop_rate, groups=1, base_width=64,
     ):
         super().__init__()
         layer = block_type(

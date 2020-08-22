@@ -1,9 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+from model.common import *
+
 from .blocks import *
 from .utils import *
-from model.common import *
 
 
 class MNANet(nn.Module):
@@ -70,21 +72,13 @@ class MNANet(nn.Module):
         if self.block_type.expansion == 4:
             hidden_layers.append(
                 self._build_unit(
-                    self.block_type,
-                    self.channels_in,
-                    layers[-1],
-                    downsample=True,
-                    size=2,
+                    self.block_type, self.channels_in, layers[-1], downsample=True, size=2,
                 )
             )
         else:
             hidden_layers.append(
                 self._build_unit(
-                    self.block_type,
-                    self.channels_in,
-                    layers[-1],
-                    downsample=False,
-                    size=2,
+                    self.block_type, self.channels_in, layers[-1], downsample=False, size=2,
                 )
             )
         hidden_layers.append(transition())

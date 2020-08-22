@@ -1,9 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .blocks import *
-from model.common import *
+
 from model.BaseNet.net import BaseNet
+from model.common import *
+
+from .blocks import *
 
 
 class NiN_Net(BaseNet):

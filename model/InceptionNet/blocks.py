@@ -1,6 +1,6 @@
 import torch
-import torch.nn as nn
 import torch.functional as F
+import torch.nn as nn
 
 
 class stem_v2(nn.Module):
@@ -38,9 +38,7 @@ class stem_v2(nn.Module):
         self.conv_1_3 = nn.Conv2d(64, 64, kernel_size=(1, 7), padding=1)
         self.conv_1_4 = nn.Conv2d(64, 96, kernel_size=3, padding=0)
 
-        self.l1_1 = nn.Sequential(
-            self.conv_1_1, self.conv_1_2, self.conv_1_3, self.conv_1_4
-        )
+        self.l1_1 = nn.Sequential(self.conv_1_1, self.conv_1_2, self.conv_1_3, self.conv_1_4)
 
         self.conv_0_3 = nn.Conv2d(192, 192, kernel_size=3, stride=2, padding=0)
         self.maxpool_1_5 = nn.MaxPool2d(stride=2, kernel_size=3, padding=0)
@@ -164,9 +162,7 @@ class InceptionB(nn.Module):
         split_out[0] = self.conv_0_1(self.avg_0_0(x))
         split_out[1] = self.conv_1_0(x)
         split_out[2] = self.conv_2_2(self.conv_2_1(self.conv_2_0(x)))
-        split_out[3] = self.conv_3_4(
-            self.conv_3_3(self.conv_3_2(self.conv_3_1(self.conv_3_0(x))))
-        )
+        split_out[3] = self.conv_3_4(self.conv_3_3(self.conv_3_2(self.conv_3_1(self.conv_3_0(x)))))
 
         out = torch.cat(split_out, 1)
 
@@ -242,4 +238,3 @@ class InceptionC(nn.Module):
     def forward(self, x):
         out = self._forward_impl(x)
         return out
-

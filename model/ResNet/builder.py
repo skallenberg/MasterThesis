@@ -1,5 +1,5 @@
-from .net import ResNet
 from .blocks import *
+from .net import ResNet
 
 
 def _resnet(name, block_type, layers, num_classes=10, **kwargs):
@@ -47,4 +47,3 @@ def WideTest(**kwargs):
 def WideResNet50(**kwargs):
     kwargs["width_per_group"] = 64 * 2
     return _resnet("WideResNet50", residual_bottleneck_block, [3, 4, 6, 3], **kwargs)
-

@@ -1,7 +1,8 @@
-from .blocks import *
 import torch
-import torch.nn as nn
 import torch.functional as F
+import torch.nn as nn
+
+from .blocks import *
 
 
 class interpolate(nn.Module):
@@ -13,8 +14,7 @@ class interpolate(nn.Module):
         self.channels_in = channels_in
         if self.channels_in:
             self.conv = conv_1x1(
-                channels_in=self.channels_in,
-                channels_out=int(self.channels_in * self.scale),
+                channels_in=self.channels_in, channels_out=int(self.channels_in * self.scale),
             )
 
     def forward(self, x):
@@ -76,4 +76,3 @@ class Inception_v4(nn.Module):
     def forward(self, x):
         out = self._forward_impl(x)
         return out
-
