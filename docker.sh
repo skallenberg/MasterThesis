@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo userdocker run -w /home/skallenberg/Github/MasterThesis/ -it wi2:pytorch
+sudo userdocker run -w /home/skallenberg/MasterThesis/ -it wi2:pytorch

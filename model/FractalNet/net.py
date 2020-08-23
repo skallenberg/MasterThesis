@@ -7,6 +7,8 @@ from model.common import *
 
 from .blocks import *
 
+import numpy as np
+
 
 class FractalNet(BaseNet):
     def __init__(
@@ -85,7 +87,7 @@ class FractalNet(BaseNet):
             groups=self.groups,
             base_width=self.base_width,
             prev_dilation=previous_dilation,
-            dilaton=self.dilation,
+            dilation=self.dilation,
             drop_path=global_or_local,
         )
         return block

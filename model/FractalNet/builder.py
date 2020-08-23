@@ -20,12 +20,12 @@ def FractalTest():
 
 
 def FractalNet3():
-    return _fractal_net("FractalNet3", base_block, 3)
+    return _fractal_net("FractalNet3", base_block, 3, drop_path=True)
 
 
 def FractalNet4():
-    return _fractal_net("FractalNet4", base_block, 4)
+    return _fractal_net("FractalNet4", base_block, 4, drop_path=True)
 
 
 def FractalNet5():
-    return _fractal_net("FractalNet5", base_block, 5)
+    return _fractal_net("FractalNet5", base_block, 5, drop_path=True)

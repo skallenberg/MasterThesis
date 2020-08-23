@@ -10,7 +10,7 @@ def _mna_net(name, block_type, layers, num_classes=10, residual=False, progressi
 
 
 def MAN_Test():
-    return _mna_net("MAN_Test", _base_block, [2, 2, 2, 2, 2], progressive=True, residual=True)
+    return _mna_net("MAN_Test", base_block, [2, 2, 2, 2, 2], progressive=True, residual=True)
 
 
 def MAN_Bottle_Test():

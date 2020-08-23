@@ -4,6 +4,8 @@ import torch.nn.functional as F
 
 from model.common import *
 
+import numpy as np
+
 
 class fractal_path(nn.Module):
     def __init__(
@@ -50,7 +52,7 @@ class fractal_path(nn.Module):
         if fractal_expansion > 1:
             fractals = []
             fractals.append(
-                _fractal_path(
+                fractal_path(
                     block_type=block_type,
                     channels_in=channels_in,
                     channels_out=channels_out,
@@ -65,7 +67,7 @@ class fractal_path(nn.Module):
                 )
             )
             fractals.append(
-                _fractal_path(
+                fractal_path(
                     block_type=block_type,
                     channels_in=channels_in,
                     channels_out=channels_out,
