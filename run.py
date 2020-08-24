@@ -17,7 +17,7 @@ torch.backends.cudnn.benchmark = config["Misc"]["cudnnBenchmark"]
 
 logging.basicConfig(level=logging.INFO)
 
-data = load_data.get_data(augment=config["DataLoader"]["Augment"])
+data = load_data.get_data()
 
 logging.info("Loaded Dataset")
 

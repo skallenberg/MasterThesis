@@ -1,5 +1,6 @@
 from .ResNet import *
 from .BaseNet import *
+from .BaseNetv2 import *
 from .DenseNet import *
 from .FractalNet import *
 from .NetworkInNetwork import *

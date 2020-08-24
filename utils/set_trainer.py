@@ -4,20 +4,18 @@ from datetime import datetime
 
 import matplotlib.pyplot as plt
 
-from ignite.handlers import EarlyStopping, TerminateOnNan
+from ignite.handlers import EarlyStopping, TerminateOnNan, Timer
 import ignite.metrics as metrics
 import torch
 import torch.nn as nn
+from torch.cuda.amp import GradScaler, autocast
 from ignite.contrib.handlers import ProgressBar, FastaiLRFinder
 from ignite.contrib.handlers.param_scheduler import CosineAnnealingScheduler
 from ignite.contrib.handlers.tensorboard_logger import *
-from ignite.engine import Events
+from ignite.engine import Events, Engine
 from ignite.engine import create_supervised_evaluator
-from ignite.engine import create_supervised_trainer
-from torch.utils.tensorboard import SummaryWriter
 
 from utils import set_config
-from utils import visualize
 from utils.ignite_metrics import ROC_AUC
 from utils.config import Config
 
@@ -28,18 +26,7 @@ if torch.cuda.is_available():
 else:
     device = torch.device("cpu")
 
-criterion = nn.CrossEntropyLoss()
-
-val_metrics = {
-    "Accuracy": metrics.Accuracy(),
-    "Running_Average_Accuracy": metrics.RunningAverage(metrics.Accuracy()),
-    "Loss": metrics.Loss(criterion),
-    "Running_Average_Loss": metrics.RunningAverage(metrics.Loss(criterion)),
-    "Precision": metrics.Precision(average=True),
-    "Recall": metrics.Recall(average=True),
-    "F1-Score": metrics.Fbeta(beta=1.0),
-    "ROC_AUC": ROC_AUC(output_transform=activated_output_transform),
-}
+criterion = nn.CrossEntropyLoss().to(device)
 
 
 def score_fn(engine):
@@ -54,13 +41,60 @@ def activated_output_transform(output):
     return y_pred, y
 
 
+def dict_to_pair(data, **kwargs):
+    inp, tar = data["input"], data["target"]
+    return inp, tar
+
+
+val_metrics = {
+    "Accuracy": metrics.Accuracy(),
+    "Running_Average_Accuracy": metrics.RunningAverage(metrics.Accuracy()),
+    "Loss": metrics.Loss(criterion),
+    "Running_Average_Loss": metrics.RunningAverage(metrics.Loss(criterion)),
+    "Precision": metrics.Precision(average=True),
+    "Recall": metrics.Recall(average=True),
+    "F1-Score": metrics.Fbeta(beta=1.0),
+    "ROC_AUC": ROC_AUC(output_transform=activated_output_transform),
+}
+
+
 def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False):
 
     optimizer = set_config.choose_optimizer(net)
 
-    trainer = create_supervised_trainer(net, optimizer, criterion, device=device)
-    train_evaluator = create_supervised_evaluator(net, metrics=val_metrics, device=device)
-    test_evaluator = create_supervised_evaluator(net, metrics=val_metrics, device=device)
+    scaler = GradScaler()
+
+    def train_step(engine, batch):
+        x, y = batch["input"], batch["target"]
+
+        optimizer.zero_grad()
+
+        # Runs the forward pass with autocasting.
+        with autocast():
+            y_pred = net(x)
+            loss = criterion(y_pred, y)
+        # Scales loss.  Calls backward() on scaled loss to create scaled gradients.
+        # Backward passes under autocast are not recommended.
+        # Backward ops run in the same precision that autocast used for corresponding forward ops.
+        scaler.scale(loss).backward()
+
+        # scaler.step() first unscales the gradients of the optimizer's assigned params.
+        # If these gradients do not contain infs or NaNs, optimizer.step() is then called,
+        # otherwise, optimizer.step() is skipped.
+        scaler.step(optimizer)
+
+        # Updates the scale for next iteration.
+        scaler.update()
+
+        return loss.item()
+
+    trainer = Engine(train_step)
+    train_evaluator = create_supervised_evaluator(
+        net, metrics=val_metrics, device=device, prepare_batch=dict_to_pair, non_blocking=True
+    )
+    test_evaluator = create_supervised_evaluator(
+        net, metrics=val_metrics, device=device, prepare_batch=dict_to_pair, non_blocking=True
+    )
 
     if lrfinder:
         find_lr(
@@ -84,10 +118,14 @@ def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False)
     ProgressBar().attach(trainer, output_transform=lambda x: {"Loss": x})
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
+    timer = Timer(average=True)
+    timer.attach(trainer, step=Events.EPOCH_COMPLETED)
+
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(engine):
         train_evaluator.run(dataset.trainloader)
         metrics = train_evaluator.state.metrics
+        logging.info("- Mean elapsed time for 1 epoch: {}".format(timer.value()))
         logging.info(
             "Training Results - Epoch:\t{}\nAverage Accuracy:\t{:.2f}\nRunning Average Accuracy:\t{:.2f}\nAverage Loss:\t{:.2f}\nRunning Average Loss:\t{:.2f}\nAverage Precision:\t{:.2f}\nAverage Recall:\t{:.2f}\nAverage F1-Score:\t{:.2f}\nAverage ROC AUC:\t{:2f}".format(
                 trainer.state.epoch,
