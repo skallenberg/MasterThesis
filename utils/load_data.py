@@ -1,205 +1,27 @@
-import torch
-import torch.nn as nn
-import copy
-import os
-from collections import namedtuple, defaultdict
 from functools import partial
+
 import numpy as np
-import torchvision
+import torch
+
 from utils.config import Config
-from functools import lru_cache as cache
+from utils.data_utils import *
 
 config = Config.get_instance()
 
 data_name = config["Setup"]["Data"]
 
-worker_count = torch.cuda.device_count() * 4
-
-gpu_path = "/data/skallenberg/datasets"
-local_path = "./data/datasets"
-
-if os.path.isdir(gpu_path):
-    data_path = gpu_path
-else:
-    data_path = local_path
-
-if torch.cuda.is_available():
-    device = torch.device("cuda:0")
-else:
-    device = torch.device("cpu")
-
-cpu = torch.device("cpu")
-
-
-def to_numpy(x):
-    if isinstance(x, torch.Tensor):
-        return x.detach().cpu().numpy()
-    return x
-
-
-def flip_lr(x):
-    if isinstance(x, torch.Tensor):
-        return torch.flip(x, [-1])
-    return x[..., ::-1].copy()
-
-
-def map_nested(func, nested_dict):
-    return {
-        k: map_nested(func, v) if isinstance(v, dict) else func(v) for k, v in nested_dict.items()
-    }
-
-
-def preprocess(dataset, transforms):
-    dataset = copy.copy(dataset)
-    for transform in reversed(transforms):
-        dataset["data"] = transform(dataset["data"])
-    return dataset
-
-
-chunks = lambda data, splits: (data[start:end] for (start, end) in zip(splits, splits[1:]))
-
-
-even_splits = lambda N, num_chunks: np.cumsum(
-    [0]
-    + [(N // num_chunks) + 1] * (N % num_chunks)
-    + [N // num_chunks] * (num_chunks - (N % num_chunks))
-)
-
-
-def shuffled(xs, inplace=False):
-    xs = xs if inplace else copy.copy(xs)
-    np.random.shuffle(xs)
-    return xs
-
-
-def transformed(data, targets, transform, max_options=None, unshuffle=False):
-    i = torch.randperm(len(data), device=device)
-    data = data[i]
-    options = shuffled(transform.options(data.shape), inplace=True)[:max_options]
-    data = torch.cat(
-        [
-            transform.apply(x, **choice)
-            for choice, x in zip(options, chunks(data, even_splits(len(data), len(options))))
-        ]
-    )
-    return (data[torch.argsort(i)], targets) if unshuffle else (data, targets[i])
-
-
-class Batches:
-    def __init__(
-        self,
-        batch_size,
-        transforms=(),
-        dataset=None,
-        shuffle=True,
-        drop_last=False,
-        max_options=None,
-    ):
-        self.dataset, self.transforms, self.shuffle, self.max_options = (
-            dataset,
-            transforms,
-            shuffle,
-            max_options,
-        )
-        N = len(dataset["data"])
-        self.splits = list(range(0, N + 1, batch_size))
-        if not drop_last and self.splits[-1] != N:
-            self.splits.append(N)
-
-    def __iter__(self):
-        data, targets = self.dataset["data"], self.dataset["targets"]
-        for transform in self.transforms:
-            data, targets = transformed(
-                data, targets, transform, max_options=self.max_options, unshuffle=not self.shuffle
-            )
-        if self.shuffle:
-            i = torch.randperm(len(data), device=device)
-            data, targets = data[i], targets[i]
-        return (
-            {"input": x.clone(), "target": y}
-            for (x, y) in zip(chunks(data, self.splits), chunks(targets, self.splits))
-        )
-
-    def __len__(self):
-        return len(self.splits) - 1
-
-
-class Crop(namedtuple("Crop", ("h", "w"))):
-    def apply(self, x, x0, y0):
-        return x[..., y0 : y0 + self.h, x0 : x0 + self.w]
-
-    def options(self, shape):
-        *_, H, W = shape
-        return [
-            {"x0": x0, "y0": y0} for x0 in range(W + 1 - self.w) for y0 in range(H + 1 - self.h)
-        ]
-
-
-class FlipLR(namedtuple("FlipLR", ())):
-    def apply(self, x, choice):
-        return flip_lr(x) if choice else x
-
-    def options(self, shape):
-        return [{"choice": b} for b in [True, False]]
-
-
-class Cutout(namedtuple("Cutout", ("h", "w"))):
-    def apply(self, x, x0, y0):
-        x[..., y0 : y0 + self.h, x0 : x0 + self.w] = 0.0
-        return x
-
-    def options(self, shape):
-        *_, H, W = shape
-        return [
-            {"x0": x0, "y0": y0} for x0 in range(W + 1 - self.w) for y0 in range(H + 1 - self.h)
-        ]
-
-
-@cache(None)
-def cifar10(root=data_path):
-    download = lambda train: torchvision.datasets.CIFAR10(root=root, train=train, download=True)
-    return {
-        k: {"data": torch.tensor(v.data), "targets": torch.tensor(v.targets)}
-        for k, v in [("train", download(True)), ("valid", download(False))]
-    }
-
-
-@cache(None)
-def cifar100(root=data_path):
-    download = lambda train: torchvision.datasets.CIFAR100(root=root, train=train, download=True)
-    return {
-        k: {"data": torch.tensor(v.data), "targets": torch.tensor(v.targets)}
-        for k, v in [("train", download(True)), ("valid", download(False))]
-    }
-
-
-@cache(None)
-def mnist(root=data_path):
-    download = lambda train: torchvision.datasets.MNIST(root=root, train=train, download=True)
-    return {
-        k: {"data": torch.tensor(v.data), "targets": torch.tensor(v.targets)}
-        for k, v in [("train", download(True)), ("valid", download(False))]
-    }
-
-
-@cache(None)
-def svhn(root=data_path):
-    download = lambda train: torchvision.datasets.SVHN(root=root, train=train, download=True)
-    return {
-        k: {"data": torch.tensor(v.data), "targets": torch.tensor(v.targets)}
-        for k, v in [("train", download(True)), ("valid", download(False))]
-    }
-
 
 class dataset:
-    def __init__(self, name, trainloader, testloader, classes):
+    def __init__(self, name, trainloader, testloader, classes, train_set=None, valid_set=None):
         self.name = name
         self.trainloader = trainloader
         self.testloader = testloader
         self.classes = classes
+        self.train_set = train_set
+        self.valid_set = valid_set
 
 
-def get_data():
+def get_data(return_sets=False):
     if data_name == "cifar10":
         data = cifar10()
         cifar10_mean, cifar10_std = [
@@ -336,10 +158,10 @@ def get_data():
             classes = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
         data_mean, data_std = [
             np.mean(
-                dataset["train"]["data"], axis=(0, 1, 2)
+                data["train"]["data"].numpy(), axis=(0, 1, 2)
             ),  # equals np.mean(cifar10()['train']['data'], axis=(0,1,2))
             np.std(
-                dataset["train"]["data"], axis=(0, 1, 2)
+                data["train"]["data"].numpy(), axis=(0, 1, 2)
             ),  # equals np.std(cifar10()['train']['data'], axis=(0,1,2))
         ]
 
@@ -370,6 +192,16 @@ def get_data():
     )
     valid_batches = valid_batcher(batch_size=config["DataLoader"]["BatchSize"])
 
-    return_set = dataset(data_name, train_batches, valid_batches, classes)
+    if return_sets:
+        dataset_final = dataset(
+            data_name,
+            train_batches,
+            valid_batches,
+            classes,
+            train_set=train_set,
+            valid_set=valid_set,
+        )
+    else:
+        dataset_final = dataset(data_name, train_batches, valid_batches, classes)
 
-    return return_set
+    return dataset_final

@@ -5,11 +5,10 @@ import torch.nn.functional as F
 from model.common import *
 
 from .blocks import *
-from .utils import *
 from utils.config import Config
 
 config = Config.get_instance()
-alpha = 0.075
+alpha = config["Misc"]["CELU_alpha"]
 
 
 class BaseNetv2(nn.Module):
@@ -21,21 +20,10 @@ class BaseNetv2(nn.Module):
         num_classes,
         groups=1,
         width_per_group=64,
-        replace_stride_with_dilation=None,
+        depthwise=False,
         rgb=False,
     ):
         super().__init__()
-
-        if isinstance(layers, int):
-            layers = [1] * layers
-        if replace_stride_with_dilation is None:
-            self.replace_stride_with_dilation = [False] * (len(layers))
-
-        if len(self.replace_stride_with_dilation) != len(layers):
-            raise ValueError(
-                "replace_stride_with_dilation should be None "
-                "or a n-element tuple, got {}".format(self.replace_stride_with_dilation)
-            )
 
         self.name = name
         self.writer = ""
@@ -45,6 +33,7 @@ class BaseNetv2(nn.Module):
         self.groups = groups
         self.base_width = width_per_group
         self.block_type = block_type
+        self.depthwise = depthwise
         self.channels_in = 64
         self.conv0 = whitening_block(3, self.channels_in)
         self.bn0 = GhostBatchNorm(self.channels_in, config["DataLoader"]["BatchSize"] // 32)
@@ -57,6 +46,8 @@ class BaseNetv2(nn.Module):
         self.global_maxpool = nn.AdaptiveMaxPool2d((1, 1))
         self.fc = nn.Linear(self.block_type.expansion * 64 * (2 ** (len(layers) - 1)), num_classes)
 
+        self.scale = config["Misc"]["FC_Scale"]
+
         self._init_modules()
 
     def _init_modules(self):
@@ -68,24 +59,14 @@ class BaseNetv2(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
     def _build_layers(self, layers):
-        hidden_layers = [self._build_unit(64, layers[0])]
+        hidden_layers = [self._build_unit(64, layers[0], stride=1)]
         for i in range(1, len(layers)):
-            hidden_layers.append(
-                self._build_unit(
-                    64 * (2 ** i),
-                    layers[i],
-                    stride=2,
-                    dilate=self.replace_stride_with_dilation[i],
-                )
-            )
+            hidden_layers.append(self._build_unit(64 * (2 ** i), layers[i], stride=2,))
         return nn.Sequential(*hidden_layers)
 
-    def _build_unit(self, channels, blocks, stride=1, dilate=False):
-        previous_dilation = self.dilation
-
-        if dilate:
-            self.dilation *= stride
-            stride = 1
+    def _build_unit(
+        self, channels, blocks, stride=1,
+    ):
 
         layers = []
         layers.append(
@@ -95,7 +76,7 @@ class BaseNetv2(nn.Module):
                 stride=stride,
                 groups=self.groups,
                 base_width=self.base_width,
-                dilation=previous_dilation,
+                depthwise=self.depthwise,
                 extra=True,
             )
         )
@@ -107,7 +88,7 @@ class BaseNetv2(nn.Module):
                     channels_out=channels,
                     groups=self.groups,
                     base_width=self.base_width,
-                    dilation=previous_dilation,
+                    depthwise=self.depthwise,
                 )
             )
         return nn.Sequential(*layers)
@@ -124,7 +105,7 @@ class BaseNetv2(nn.Module):
         out = torch.flatten(out, 1)
         out = self.fc(out)
 
-        out *= 0.125
+        out *= self.scale
 
         return out
 

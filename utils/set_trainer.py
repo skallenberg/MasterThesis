@@ -98,6 +98,8 @@ def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False)
 
     if lrfinder:
         find_lr(
+            net,
+            optimizer,
             trainer,
             dataset,
             nruns=config["Trainer"]["LRFinderCycles"],
@@ -161,15 +163,16 @@ def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False)
     return trainer, train_evaluator, test_evaluator
 
 
-def find_lr(trainer, dataset, nruns=1, plot=False):
+def find_lr(model, optimizer, trainer, dataset, nruns=1, plot=False):
 
     lr_finder = FastaiLRFinder()
 
     upper_bound = 0
     lower_bound = 0
     lr_bounds = []
+    to_save = {"model": model, "optimizer": optimizer}
     for i in range(nruns):
-        with lr_finder.attach(trainer) as trainer_with_lr_finder:
+        with lr_finder.attach(trainer, to_save=to_save) as trainer_with_lr_finder:
             trainer_with_lr_finder.run(dataset.trainloader)
 
         if plot:
