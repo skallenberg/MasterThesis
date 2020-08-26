@@ -64,15 +64,30 @@ class base_block(nn.Module):
 class bottleneck_block(nn.Module):
     expansion = 4
 
-    def __init__(self, channels_in, channels_out, stride=1, groups=1, base_width=64, extra=False):
+    def __init__(
+        self,
+        channels_in,
+        channels_out,
+        stride=1,
+        groups=1,
+        base_width=64,
+        extra=False,
+        depthwise=False,
+    ):
         super().__init__()
         width = int(channels_out * (base_width / 64.0)) * groups
+        if depthwise:
+            groups = channels_in
         self.conv1 = conv_1x1(channels_in, width, groups=groups)
         self.bn1 = GhostBatchNorm(width, config["DataLoader"]["BatchSize"] // 32)
 
+        if depthwise:
+            groups = width
         self.conv2 = conv_3x3(width, width, groups=groups)
         self.bn2 = GhostBatchNorm(width, config["DataLoader"]["BatchSize"] // 32)
 
+        if depthwise:
+            groups = width
         self.conv3 = conv_1x1(width, channels_out * self.expansion, groups=groups)
         self.bn3 = GhostBatchNorm(
             channels_out * self.expansion, config["DataLoader"]["BatchSize"] // 32
