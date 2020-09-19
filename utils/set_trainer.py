@@ -18,6 +18,7 @@ from ignite.engine import create_supervised_evaluator
 from utils import set_config
 from utils.ignite_metrics import ROC_AUC
 from utils.config import Config
+from utils.cross_entropy import CrossEntropyLoss
 
 config = Config.get_instance()
 
@@ -26,7 +27,7 @@ if torch.cuda.is_available():
 else:
     device = torch.device("cpu")
 
-criterion = nn.CrossEntropyLoss().to(device)
+criterion = CrossEntropyLoss(smooth_eps=0.1).to(device)
 
 
 def score_fn(engine):

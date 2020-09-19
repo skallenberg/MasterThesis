@@ -3,14 +3,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from model.common import *
+from utils.config import Config
 
 from .utils import *
-
-from utils.config import Config
 
 config = Config.get_instance()
 
 alpha = config["Misc"]["CELU_alpha"]
+
+apply = lambda x, y: x(y)
 
 
 class mgconv_progressive_block(nn.Module):
@@ -23,7 +24,6 @@ class mgconv_progressive_block(nn.Module):
         groups=1,
         base_width=64,
         residual=False,
-        downsample_identity=False,
         nlayers=2,
         depthwise=False,
         extra=False,
@@ -33,7 +33,6 @@ class mgconv_progressive_block(nn.Module):
         self.maxpool = nn.MaxPool2d(2, stride=1, padding=1)
         self.upsample = interpolate(scale=2)
         self.downsample = interpolate(scale=0.5)
-        self.downsample_identity = downsample_identity
         self.downsample_list = None
         self.nlayers = nlayers
         self.residual = residual
@@ -52,8 +51,8 @@ class mgconv_progressive_block(nn.Module):
         if self.depthwise:
             groups = ch_in // 4
 
+        parts = []
         for i in range(self.nlayers):
-            parts = []
             parts.append(
                 conv_3x3(ch_in // 4, ch_out // 4 * self.block_type.expansion, groups=groups)
             )
@@ -63,29 +62,29 @@ class mgconv_progressive_block(nn.Module):
                 )
             )
             parts.append(nn.CELU(alpha))
-            inital_conv.append(nn.Sequential(*parts))
             ch_in = ch_out * self.block_type.expansion
             groups = ch_in // 4
-        self.initial_conv = inital_conv
+        self.initial_conv = nn.Sequential(*parts)
 
-        self.mg_conv_path_1 = nn.ModuleList()
-        for i in range(self.nlayers):
-            self.mg_conv_path_1.append(
+        self.mg_conv_path_1 = nn.ModuleList(
+            [
                 self._make_mg_path(
                     self.channels_out * self.block_type.expansion, self.channels_out, size=2,
                 )
-            )
+                for i in range(self.nlayers)
+            ]
+        )
 
-        self.mg_conv_path_2 = nn.ModuleList()
-        for i in range(self.nlayers):
-            self.mg_conv_path_2.append(
+        self.mg_conv_path_2 = nn.ModuleList(
+            [
                 self._make_mg_path(
                     self.channels_out * self.block_type.expansion, self.channels_out, size=3,
                 )
-            )
+                for i in range(self.nlayers)
+            ]
+        )
 
-        if self.downsample_identity:
-            self.downsample_list = self._make_downsamples()
+        self.downsample_list = self._make_downsamples()
 
     def _make_downsamples(self):
         downsamples = nn.ModuleList()
@@ -147,7 +146,7 @@ class mgconv_progressive_block(nn.Module):
         return mgconv_path
 
     def _concat(self, x):
-        grids = []
+        """grids = []
 
         for idx in range(len(x)):
             neighbours = []
@@ -162,8 +161,22 @@ class mgconv_progressive_block(nn.Module):
                 neighbours.append(self.downsample(x[idx - 1]))
             if idx == 2:
                 neighbours.append(self.downsample(x[idx - 1]))
-                neighbours.append(x[idx])
-            grids.append(torch.cat(neighbours, 1))
+                neighbours.append(x[idx])  
+            grids.append(torch.cat(neighbours, 1))"""
+
+        n = len(x)
+        if n == 1:
+            pairs = [[x[0]]]
+        elif n == 2:
+            pairs = [[self.upsample(x[1]), x[0]], [x[1], self.downsample(x[0])]]
+        elif n == 3:
+            pairs = [
+                [self.upsample(x[1]), x[0]],
+                [self.upsample(x[2]), x[1], self.downsample(x[0])],
+                [self.downsample(x[1]), x[2]],
+            ]
+        cat_ = lambda x: torch.cat(x, 1)
+        grids = map(cat_, pairs)
         return grids
 
     def _forward_impl(self, x):
@@ -194,21 +207,21 @@ class mgconv_progressive_block(nn.Module):
             out = [out[i] + identity[i] for i in range(3)]
 
         else:
-            out = x[2]
-            for idx in range(len(self.initial_conv)):
-                out = self.initial_conv[idx](out)
+            out = self.initial_conv(x[2])
 
             out = [self.downsample_list[1](x[1]), out]
             for idx in range(self.nlayers):
                 out = self._concat(out)
-                out = [self.mg_conv_path_1[idx][i](out[i]) for i in range(2)]
+                result = map(apply, self.mg_conv_path_1[idx], out)
+                out = result
+                # out = [self.mg_conv_path_1[idx][i](out[i]) for i in range(2)]
 
             out = [self.downsample_list[0](x[0]), *out]
-
             for idx in range(self.nlayers):
                 out = self._concat(out)
-                out = [self.mg_conv_path_2[idx][i](out[i]) for i in range(3)]
-        return out
+                out = map(apply, self.mg_conv_path_2[idx], out)
+                # out = [self.mg_conv_path_2[idx][i](out[i]) for i in range(3)]
+        return list(out)
 
     def forward(self, x):
 
@@ -341,7 +354,7 @@ class mgconv_base_block(nn.Module):
         return mgconv_path
 
     def _concat(self, x):
-        grids = []
+        """grids = []
 
         for idx in range(len(x)):
             neighbours = []
@@ -356,20 +369,35 @@ class mgconv_base_block(nn.Module):
                 neighbours.append(self.downsample(x[idx - 1]))
             if idx == 2:
                 neighbours.append(self.downsample(x[idx - 1]))
-                neighbours.append(x[idx])
-            grids.append(torch.cat(neighbours, 1))
+                neighbours.append(x[idx])  
+            grids.append(torch.cat(neighbours, 1))"""
+
+        n = len(x)
+        if n == 1:
+            pairs = [[x[0]]]
+        elif n == 2:
+            pairs = [[self.upsample(x[1]), x[0]], [x[1], self.downsample(x[0])]]
+        elif n == 3:
+            pairs = [
+                [self.upsample(x[1]), x[0]],
+                [self.upsample(x[2]), x[1], self.downsample(x[0])],
+                [self.downsample(x[1]), x[2]],
+            ]
+        cat_ = lambda x: torch.cat(x, 1)
+        grids = map(cat_, pairs)
         return grids
 
     def _forward_impl(self, x):
         # Input should be made out of 1-3 "grids" so  3 separate inputs
         # Input is combined with its neighbours through up and downsampling
-        results = []
-        results_2 = []
-        grids_1 = self._concat(x)
+        # results = []
+        grids = self._concat(x)
 
-        for idx, input in enumerate(grids_1):
-            out = self.mgconv_path_1[idx](input)
-            results.append(out)
+        # for idx, input in enumerate(grids):
+        #    out = self.mgconv_path_1[idx](input)
+        #    results.append(out)
+
+        results = list(map(apply, self.mgconv_path_1, grids))
 
         return results
 

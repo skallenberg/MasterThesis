@@ -1,13 +1,16 @@
-import torch
-import torch.nn as nn
 import copy
 import os
-from collections import namedtuple, defaultdict
-from functools import partial
-import numpy as np
-import torchvision
-from utils.config import Config
+from collections import defaultdict
+from collections import namedtuple
 from functools import lru_cache as cache
+from functools import partial
+
+import numpy as np
+import torch
+import torch.nn as nn
+import torchvision
+
+from utils.config import Config
 
 gpu_path = "/data/skallenberg/datasets"
 local_path = "./data/datasets"

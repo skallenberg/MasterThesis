@@ -29,7 +29,7 @@ class MRNNetv2(ResNetv2):
                 stride=1,
                 bias=False,
             ),
-            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            nn.MaxPool2d(kernel_size=3, stride=8, padding=1),
         )
 
     def _build_layers(self, layers):

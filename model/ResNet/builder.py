@@ -20,7 +20,7 @@ def StochasticDepthTest():
 
 
 def ResNet34():
-    return _resnet("ResNet34", residual_base_block, [3, 4, 6, 3])
+    return _resnet("ResNet34", residual_base_block, [3, 4, 6, 3], sd="prog")
 
 
 def ResNet50():

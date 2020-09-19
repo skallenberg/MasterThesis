@@ -26,7 +26,7 @@ class MNANetv2(nn.Module):
         progressive=False,
         groups=1,
         width_per_group=64,
-        depthwise=False,
+        depthwise=True,
     ):
         super().__init__()
         self.name = name
@@ -69,7 +69,7 @@ class MNANetv2(nn.Module):
     def _init_modules(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="leaky_relu")
             elif isinstance(m, (GhostBatchNorm, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
@@ -101,7 +101,6 @@ class MNANetv2(nn.Module):
                 self.block_type,
                 64,
                 64,
-                downsample_identity=True,
                 nlayers=layers[0],
                 groups=self.groups,
                 base_width=self.base_width,
@@ -126,7 +125,7 @@ class MNANetv2(nn.Module):
                 groups=self.groups,
                 base_width=self.base_width,
                 depthwise=self.depthwise,
-                extra=True,
+                extra=False,
             )
         )
         self.channels_in = channels * self.block_type.expansion
@@ -149,9 +148,7 @@ class MNANetv2(nn.Module):
 
         init = self.activation0(self.bn0(self.conv0(x)))
 
-        out = [init] * 3
-        out[1] = self.inital_downsample_1(init)
-        out[2] = self.inital_downsample_2(init)
+        out = [init, self.inital_downsample_1(init), self.inital_downsample_2(init)]
 
         out = self.hidden_layers(out)
         out = out[0]

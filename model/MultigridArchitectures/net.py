@@ -135,11 +135,12 @@ class MNANet(nn.Module):
 
     def _forward_impl(self, x):
 
-        input = self.activation0(self.bn0(self.conv0(x)))
+        input_ = self.activation0(self.bn0(self.conv0(x)))
+        input_ = p
 
-        out = [input] * 3
-        out[1] = self.inital_downsample_1(input)
-        out[2] = self.inital_downsample_2(input)
+        out = [input_] * 3
+        out[1] = self.inital_downsample_1(input_)
+        out[2] = self.inital_downsample_2(input_)
 
         out = self.hidden_layers(out)
         out = out[0]

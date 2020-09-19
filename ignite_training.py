@@ -95,6 +95,7 @@ def train(net, dataset):
     )
 
     tb_logger.attach(trainer, event_name=Events.EPOCH_COMPLETED, log_handler=GradsHistHandler(net))
+
     with torch.autograd.set_detect_anomaly(True):
         trainer.run(dataset.trainloader, max_epochs=config["Setup"]["Epochs"])
 

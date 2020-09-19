@@ -1,0 +1,123 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Masterthesis in DataScience
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Sean Kallenberg, University of Trier, 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[a4paper,12pt,titlepage,enabledeprecatedfontcommands]{scrreprt} 
+
+\usepackage[T1]{fontenc}            
+\usepackage[utf8]{inputenc}         
+\usepackage{amsmath,amsfonts, amssymb, amsthm, mathrsfs}
+\usepackage{bbm}                    
+\usepackage{graphicx}               
+\usepackage{textcomp,doc}
+\usepackage{cmbright}               
+\usepackage{courier}                
+\usepackage{color}							
+\usepackage{exscale}						
+\usepackage[english]{babel}		
+\usepackage{times}						
+\usepackage{graphicx}						
+\usepackage{pgf}	
+\usepackage{listings}
+\usepackage{cite}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{bm}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{wrapfig}
+\usepackage{subfig}
+
+\parskip1ex                         
+\parindent0mm                       
+
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}[definition]{Beispiel}
+\newtheorem{theorem}[definition]{Theorem}
+
+\begin{document}
+
+
+\begin{titlepage}
+\phantom{erste Zeile}
+\begin{center}
+\Huge
+\textbf{Multigrid Methods \\ in \\Neuronal Networks}\\
+\vspace{0.5cm}
+\large
+\vspace{3cm}
+MASTER THESIS \\
+\vspace{0.5cm}
+to obtain the academic degree of \\
+Master of Science \\
+\vspace{1cm}
+submitted to the Department IV - Data Science\\
+of the University of Trier \\
+\vspace{2.5cm}
+by \\
+\vspace{1cm}
+Sean, Kallenberg,\\
+Zurmaienerstraße 135 \\
+54292 Trier \\
+\vspace{1cm}
+Supervisor: Prof. Dr. Volker Schulz \\
+\vspace{1cm}
+Trier, \today         
+\end{center}
+\normalsize
+\vfill
+\end{titlepage}
+
+\pagenumbering{roman}
+\large
+\vspace{2.5cm}
+\begin{center}
+\textbf{Statutory Declaration}\\
+\end{center}
+\vspace{0.5cm}
+\normalsize
+I hereby declare that I wrote this thesis independently and have not used any other source or tool than the ones indicated. Any thought taken directly or indirectly from external sources are marked as such. This master thesis was not presented to any other examination office in the same or similar form. It was not yet published.
+
+\vspace{9cm}
+
+\today\\             
+
+\smallskip
+\small\hspace{0cm}(Date) \hspace{8cm} (Signature)
+\normalsize
+\newpage
+
+\tableofcontents
+\listoffigures
+
+\newpage
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
+\chapter{Introduction}
+\chapter{Related Work}
+\chapter{Multigrid Methods}
+\section{Fundamentals}
+\section{Iterative Algorithms}
+\section{Convergence Theory}
+\chapter{Artificial Neuronal Networks}
+\section{Concept}
+\section{Convolutional Networks}
+\section{Sophisticated Network Architectures}
+\chapter{Application of Multigrid Methods in CNNs}
+\section{Multigrid as Network Architecture}
+\section{Multigrid as Forward Propagation}
+\chapter{Implementation and empirical Analysis}
+\section{Chosen Network Architectures}
+\section{Realization in Python}
+\section{Analysis}
+\chapter{Conclusion}
+\cite{Goodfellow-et-al-2016}
+
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{plain}
+\bibliography{references} \label{bibtex}
+\end{document}

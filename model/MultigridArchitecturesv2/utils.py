@@ -6,7 +6,7 @@ from model.common import *
 
 
 class interpolate(nn.Module):
-    def __init__(self, channels_in=None, scale=None, mode="nearest"):
+    def __init__(self, channels_in=None, scale=None, mode="bilinear"):
         super().__init__()
         self.interpol = nn.functional.interpolate
         self.scale = scale
