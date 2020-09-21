@@ -1,4 +1,4 @@
-from model.ResNet.blocks import *
+from model.v1.ResNet.blocks import *
 
 from .net import MRNNet
 

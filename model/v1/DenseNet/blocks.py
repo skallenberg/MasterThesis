@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from model.BaseNet.blocks import *
+from model.v1.BaseNet.blocks import *
 from model.common import *
 
 

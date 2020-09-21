@@ -15,22 +15,13 @@ data_name = config["Setup"]["Data"]
 
 class BaseNetv2(nn.Module):
     def __init__(
-        self,
-        name,
-        block_type,
-        layers,
-        num_classes,
-        groups=1,
-        width_per_group=64,
-        depthwise=False,
-        rgb=False,
+        self, name, block_type, layers, num_classes, groups=1, width_per_group=64, depthwise=False,
     ):
         super().__init__()
 
         self.name = name
         self.writer = ""
         self.num_classes = num_classes
-        self.dilation = 1
         self.block_type = block_type
         self.groups = groups
         self.base_width = width_per_group

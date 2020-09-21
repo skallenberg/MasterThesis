@@ -1,4 +1,4 @@
-from model.ResNetv2.blocks import *
+from model.v2.ResNetv2.blocks import *
 
 from .net import MRNNetv2
 

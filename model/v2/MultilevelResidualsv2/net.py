@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from model.common import *
-from model.ResNetv2.net import ResNetv2
+from model.v2.ResNetv2.net import ResNetv2
 
 
 class MRNNetv2(ResNetv2):

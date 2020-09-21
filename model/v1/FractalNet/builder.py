@@ -1,4 +1,4 @@
-from model.BaseNet.blocks import *
+from model.v1.BaseNet.blocks import *
 
 from .net import FractalNet
 

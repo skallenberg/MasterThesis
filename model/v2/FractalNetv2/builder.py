@@ -1,4 +1,4 @@
-from model.BaseNetv2.blocks import *
+from model.v2.BaseNetv2.blocks import *
 
 from .net import FractalNetv2
 

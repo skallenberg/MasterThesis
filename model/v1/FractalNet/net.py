@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from model.BaseNet.net import BaseNet
+from model.v1.BaseNet.net import BaseNet
 from model.common import *
 
 from .blocks import *
