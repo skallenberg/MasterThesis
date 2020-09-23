@@ -21,6 +21,11 @@ def _FASMGNet(name, layers, num_classes=num_classes, **kwargs):
     return model
 
 
+def _VMGNet(name, layers, num_classes=num_classes, **kwargs):
+    model = VMGNet(name, layers, num_classes, **kwargs)
+    return model
+
+
 def MGNetTest(**kwargs):
     return _MGNet("MGNetTest", 3, **kwargs)
 
@@ -28,7 +33,12 @@ def MGNetTest(**kwargs):
 def FASMGNetTest(**kwargs):
     kwargs["mode"] = 1
     kwargs["smoothing_steps"] = 2
-    return _FASMGNet("VMGNetTest", 3, **kwargs)
+    return _FASMGNet("FASMGNetTest", 3, **kwargs)
+
+
+def VMGNetTest(**kwargs):
+    kwargs["smoothing_steps"] = 2
+    return _VMGNet("VMGNetTest", 3, **kwargs)
 
 
 def MGNet34(**kwargs):
