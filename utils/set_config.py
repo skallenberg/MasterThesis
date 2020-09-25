@@ -10,12 +10,12 @@ arch = config["Setup"]["Architecture"]
 
 
 def choose_optimizer(net):
-    if opt == "SDG":
+    if opt == "SGD":
         return optim.SGD(
             net.parameters(),
             lr=config["Optimizer"]["LearnRate"],
             momentum=config["Optimizer"]["Momentum"],
-            nesterov=config["Optimizer"]["SDGNesterov"],
+            nesterov=config["Optimizer"]["SGDNesterov"],
             weight_decay=config["Optimizer"]["WeightDecay"],
         )
     if opt == "Adam":
@@ -31,6 +31,14 @@ def choose_optimizer(net):
             lr=config["Optimizer"]["LearnRate"],
             lr_decay=config["Optimizer"]["AdaGradLRDecay"],
             weight_decay=config["Optimizer"]["WeightDecay"],
+        )
+
+    if opt == "AdamW":
+        return optim.AdamW(
+            net.parameters(),
+            lr=config["Optimizer"]["LearnRate"],
+            weight_decay=config["Optimizer"]["WeightDecay"],
+            amsgrad=config["Optimizer"]["AdamAMSGrad"],
         )
 
 

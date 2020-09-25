@@ -13,21 +13,28 @@ from ignite.contrib.handlers import ProgressBar, FastaiLRFinder
 from ignite.contrib.handlers.param_scheduler import CosineAnnealingScheduler
 from ignite.contrib.handlers.tensorboard_logger import *
 from ignite.engine import Events, Engine
-from ignite.engine import create_supervised_evaluator
+from ignite.engine import create_supervised_evaluator, create_supervised_trainer
 
 from utils import set_config
 from utils.ignite_metrics import ROC_AUC
 from utils.config import Config
 from utils.cross_entropy import CrossEntropyLoss
+from utils.mixup import *
 
 config = Config.get_instance()
+
+MixedPrecision = config["Trainer"]["MixedPrecision"]
+MixUpData = config["Trainer"]["MixUp"]
 
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
 else:
     device = torch.device("cpu")
 
-criterion = CrossEntropyLoss(smooth_eps=0.1).to(device)
+if config["Trainer"]["LabelSmoothing"]:
+    criterion = CrossEntropyLoss(smooth_eps=0.2).to(device)
+else:
+    criterion = torch.nn.CrossEntropyLoss().to(device)
 
 
 def score_fn(engine):
@@ -59,21 +66,25 @@ val_metrics = {
 }
 
 
-def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False):
-
-    optimizer = set_config.choose_optimizer(net)
-
+def _set_amp_trainer(net, dataset, optimizer):
     scaler = GradScaler()
 
     def train_step(engine, batch):
         x, y = batch["input"], batch["target"]
+
+        if MixUpData:
+            x, y_a, y_b, lam = mixup_data(x, y, 0.4)
+            x, y_a, y_b = map(torch.autograd.Variable, (x, y_a, y_b))
 
         optimizer.zero_grad()
 
         # Runs the forward pass with autocasting.
         with autocast():
             y_pred = net(x)
-            loss = criterion(y_pred, y)
+            if MixUpData:
+                loss = mixup_criterion(criterion, y_pred, y_a, y_b, lam)
+            else:
+                loss = criterion(y_pred, y)
         # Scales loss.  Calls backward() on scaled loss to create scaled gradients.
         # Backward passes under autocast are not recommended.
         # Backward ops run in the same precision that autocast used for corresponding forward ops.
@@ -90,6 +101,22 @@ def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False)
         return loss.item()
 
     trainer = Engine(train_step)
+
+    return trainer
+
+
+def _set_mixup_trainer(net, dataset, optimizer):
+    return 1
+
+
+def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False):
+
+    optimizer = set_config.choose_optimizer(net)
+
+    if MixedPrecision:
+        trainer = _set_amp_trainer(net, dataset, optimizer)
+    else:
+        trainer = create_supervised_trainer(net, optimizer, criterion)
     train_evaluator = create_supervised_evaluator(
         net, metrics=val_metrics, device=device, prepare_batch=dict_to_pair, non_blocking=True
     )
@@ -113,9 +140,7 @@ def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False)
         test_evaluator.add_event_handler(Events.COMPLETED, stopper)
 
     if scheduler:
-        scheduler = CosineAnnealingScheduler(
-            optimizer, "lr", 1e-1, 1e-3, len(dataset.trainloader), start_value=10000
-        )
+        scheduler = CosineAnnealingScheduler(optimizer, "lr", 1e-1, 1e-3, cycle_size=97)
         trainer.add_event_handler(Events.ITERATION_STARTED, scheduler)
 
     ProgressBar().attach(trainer, output_transform=lambda x: {"Loss": x})

@@ -32,13 +32,19 @@ def MGNetTest(**kwargs):
 
 def FASMGNetTest1(**kwargs):
     kwargs["mode"] = 1
-    kwargs["smoothing_steps"] = 2
-    return _FASMGNet("FASMGNetTest", 3, **kwargs)
+    kwargs["smoothing_steps"] = 3
+    return _FASMGNet("FASMGNetTest", 4, **kwargs)
 
 
 def FASMGNetTest2(**kwargs):
     kwargs["mode"] = 2
-    kwargs["smoothing_steps"] = 2
+    kwargs["smoothing_steps"] = 1
+    return _FASMGNet("FASMGNetTest", 3, **kwargs)
+
+
+def FASMGNetTest3(**kwargs):
+    kwargs["mode"] = 3
+    kwargs["smoothing_steps"] = 1
     return _FASMGNet("FASMGNetTest", 3, **kwargs)
 
 

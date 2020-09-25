@@ -17,7 +17,7 @@ alpha = config["Misc"]["CELU_alpha"]
 
 
 class MGNet(nn.Module):
-    def __init__(self, name, layers, num_classes, smoothing_steps=3):
+    def __init__(self, name, layers, num_classes, smoothing_steps=1, batch_norm=False):
         super().__init__()
 
         self.name = name
@@ -25,13 +25,14 @@ class MGNet(nn.Module):
         self.layers = layers
         self.channels_in = 64
         self.smoothing_steps = smoothing_steps
+        self.batch_norm = batch_norm
         if data_name == "mnist":
             self.conv0 = whitening_block(1, self.channels_in)
         else:
             self.conv0 = whitening_block(3, self.channels_in)
 
-        self.bn0 = GhostBatchNorm(self.channels_in, config["DataLoader"]["BatchSize"] // 32)
-        self.activation0 = nn.CELU(alpha)
+        self.bn0 = nn.BatchNorm2d(self.channels_in)
+        self.activation0 = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
         self.global_maxpool = nn.AdaptiveMaxPool2d((1, 1))
@@ -48,9 +49,14 @@ class MGNet(nn.Module):
 
     def _init_modules(self):
         for m in self.modules():
+            if isinstance(m, nn.ReLU):
+                if config["Misc"]["UseCELU"]:
+                    m = nn.CELU(alpha)
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="leaky_relu")
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+                if config["Misc"]["UseGhostBatchNorm"]:
+                    m = GhostBatchNorm(self.channels_in, config["DataLoader"]["BatchSize"] // 32)
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
@@ -58,7 +64,7 @@ class MGNet(nn.Module):
         mappings = nn.ModuleList()
         ch_in = self.channels_in
         for i in range(self.layers + 1):
-            mappings.append(mapping_block(channels_in=ch_in))
+            mappings.append(mapping_block(channels_in=ch_in, batch_norm=self.batch_norm))
             ch_in = ch_in * 2
         return mappings
 
@@ -78,7 +84,9 @@ class MGNet(nn.Module):
         for i in range(self.layers):
             grid_extractors = nn.ModuleList()
             for j in range(self.smoothing_steps):
-                grid_extractors.append(extractor_block(channels_in=ch_in))
+                grid_extractors.append(
+                    extractor_block(channels_in=ch_in, batch_norm=self.batch_norm)
+                )
             extractors.append(grid_extractors)
             ch_in *= 2
         return extractors
@@ -257,16 +265,8 @@ class FASMGNet(MGNet):
                 f_list.append(f_)
                 out_ = n_out_
 
-            if len(n_out_list) < self.layers:
-                addendum = [0] * (self.layers - len(n_out_list))
-                n_out_list = [*addendum, *n_out_list]
-                out_list = [*addendum, *out_list]
-                f_list = [*addendum, *f_list]
-
             if k > 0:
                 for i in reversed(range(0, self.layers - k)):
-                    print(out_list[i].size())
-                    print(self.prolongations[i](out_ - n_out_list[i]).size())
                     out_ = out_list[i] + self.prolongations[i](out_ - n_out_list[i])
                     for j in range(self.smoothing_steps):
                         out_ = out_ + self.extractors_up[len(self.extractors_up) - k][i][j](
@@ -279,11 +279,59 @@ class FASMGNet(MGNet):
                 f_list = [f_]
         return out_, f_
 
+    def _mode_3_cycle(self, out):
+        f_ = out
+        out_ = out * 0
+        out_list = []
+        n_out_list = []
+        f_list = [f_]
+
+        for i in range(self.layers):
+            for j in range(self.smoothing_steps):
+                out_ = out_ + self.extractors_down[0][i][j](f_ - self.mappings[i](out_))
+            out_list.append(out_)
+            n_out_ = self.feature_interpolations[i](out_)
+            n_out_list.append(n_out_)
+            f_ = self.data_interpolations[i](f_ - self.mappings[i](out_)) + self.mappings[i + 1](
+                n_out_
+            )
+            f_list.append(f_)
+            out_ = n_out_
+
+        for k in reversed(range(self.layers)):
+            for i in reversed(range(0, self.layers - k)):
+                out_ = out_list[i] + self.prolongations[i](out_ - n_out_list[i])
+                for j in range(self.smoothing_steps):
+                    out_ = out_ + self.extractors_up[len(self.extractors_up) - k][i][j](
+                        f_list[i] - self.mappings[i](out_)
+                    )
+
+            f_ = f_list[0]
+            out_list = []
+            n_out_list = []
+            f_list = [f_]
+
+            for i in range(self.layers - k):
+                for j in range(self.smoothing_steps):
+                    out_ = out_ + self.extractors_down[k][i][j](f_ - self.mappings[i](out_))
+                out_list.append(out_)
+                n_out_ = self.feature_interpolations[i](out_)
+                n_out_list.append(n_out_)
+                f_ = self.data_interpolations[i](f_ - self.mappings[i](out_)) + self.mappings[
+                    i + 1
+                ](n_out_)
+                f_list.append(f_)
+                out_ = n_out_
+
+        return out_, f_
+
     def _cycle(self, out):
         if self.mode == 1:
             return self._mode_1_cycle(out)
         elif self.mode == 2:
             return self._mode_2_cycle(out)
+        elif self.mode == 3:
+            return self._mode_3_cycle(out)
 
     def _forward_impl(self, x):
         out = self.conv0(x)
