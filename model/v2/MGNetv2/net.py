@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import math
 
 from model.common import *
 
@@ -118,9 +119,6 @@ class VMGNet(MGNet):
 
         self.prolongations = self._set_prolongation()
         self.extractors_2 = self._set_feature_extractors()
-        self.extractors_3 = self._set_feature_extractors()
-        self.extractors_4 = self._set_feature_extractors()
-        self.extractors_5 = self._set_feature_extractors()
 
     def _set_prolongation(self):
         prolongations = nn.ModuleList()
@@ -154,37 +152,10 @@ class VMGNet(MGNet):
             f_list.append(f_)
             out_ = n_out_
 
-        for i in reversed(range(1, self.layers)):
+        for i in reversed(range(self.layers)):
             out_ = out_list[i] + self.prolongations[i](out_ - n_out_list[i])
             for j in range(self.smoothing_steps):
                 out_ = out_ + self.extractors_2[i][j](f_list[i] - self.mappings[i](out_))
-
-        f_ = f_list[1]
-
-        for i in range(1, self.layers):
-            for j in range(self.smoothing_steps):
-                out_ = out_ + self.extractors_3[i][j](f_ - self.mappings[i](out_))
-            n_out_ = self.feature_interpolations[i](out_)
-            f_ = self.data_interpolations[i](f_ - self.mappings[i](out_)) + self.mappings[i + 1](
-                n_out_
-            )
-            out_ = n_out_
-
-        for i in reversed(range(2, self.layers)):
-            out_ = out_list[i] + self.prolongations[i](out_ - n_out_list[i])
-            for j in range(self.smoothing_steps):
-                out_ = out_ + self.extractors_4[i][j](f_list[i] - self.mappings[i](out_))
-
-        f_ = f_list[2]
-
-        for i in range(2, self.layers):
-            for j in range(self.smoothing_steps):
-                out_ = out_ + self.extractors_5[i][j](f_ - self.mappings[i](out_))
-            n_out_ = self.feature_interpolations[i](out_)
-            f_ = self.data_interpolations[i](f_ - self.mappings[i](out_)) + self.mappings[i + 1](
-                n_out_
-            )
-            out_ = n_out_
 
         out = out_
         out = self.global_maxpool(out)
@@ -204,11 +175,17 @@ class FASMGNet(MGNet):
     def __init__(self, name, layers, num_classes, smoothing_steps=3, mode=1):
         super().__init__(name, layers, num_classes, smoothing_steps=3)
         self.mode = mode
-        self.n_extractors = self.layers * 2 - 1
-
-        self.extractors_down, self.extractors_up = self._set_steps_down()
+        if mode == 1 or mode == 2:
+            self.n_extractor_steps = 2 * layers - 1
+        else:
+            self.n_extractor_steps = 2 * layers + 1
 
         self.prolongations = self._set_prolongation()
+        self.extractors_down = nn.ModuleList([self.extractors])
+        self.extractors_up = nn.ModuleList()
+        for i in range(self.n_extractor_steps // 2):
+            self.extractors_down.append(self._set_feature_extractors())
+            self.extractors_up.append(self._set_feature_extractors())
 
     def _set_prolongation(self):
         prolongations = nn.ModuleList()
@@ -219,70 +196,106 @@ class FASMGNet(MGNet):
             )
         return prolongations
 
-    def _set_steps_down(self):
-        if self.mode == 1 or self.mode == 3:
-            extractor_list_down = nn.ModuleList()
-            extractor_list_up = nn.ModuleList()
-            for i in range(self.n_extractors + 1):
-                extractor_list_down.append(
-                    self._set_stepwise_feature_extractors(
-                        i, self.layers, self.channels_in * 2 ** i
-                    )
-                )
-            for i in range(self.n_extractors + 1):
-                extractor_list_up.append(
-                    self._set_stepwise_feature_extractors(
-                        0, self.layers - i, self.channels_in * 2 ** i
-                    )
-                )
-            if self.mode == 3:
-                extractor_list_down = reversed(extractor_list_down)
-                extractor_list_up = reversed(extractor_list_up)
-        if self.mode == 2:
-            extractor_list_down = nn.ModuleList()
-            extractor_list_up = nn.ModuleList()
-            for i in range(self.n_extractors + 1):
-                extractor_list_down.append(
-                    self._set_stepwise_feature_extractors(
-                        i, self.layers, self.channels_in * 2 ** i
-                    )
-                )
-            for i in range(self.n_extractors + 1):
-                extractor_list_up.append(
-                    self._set_stepwise_feature_extractors(
-                        i, self.layers, self.channels_in * 2 ** i
-                    )
-                )
-            extractor_list_down = reversed(extractor_list_down)
-            extractor_list_down = nn.ModuleList(
-                *[
-                    self._set_stepwise_feature_extractors(0, self.layers, self.channels_in),
-                    *extractor_list_down,
-                ]
-            )
-            extractor_list_up = reversed(extractor_list_up)
-        return extractor_list_down, extractor_list_up
-
-    def _set_stepwise_feature_extractors(self, start, stop, ch_in):
-        extractors = nn.ModuleList()
-        for i in range(start, stop):
-            grid_extractors = nn.ModuleList()
-            for j in range(self.smoothing_steps):
-                grid_extractors.append(extractor_block(channels_in=ch_in))
-            extractors.append(grid_extractors)
-            ch_in *= 2
-        return extractors
-
-    def _cycle_down(self, extractors, start, stop, out_, f_):
+    def _mode_1_cycle(self, out):
+        f_ = out
+        out_ = out * 0
         out_list = []
         n_out_list = []
         f_list = [f_]
-        iterator = 0
-        for i in range(start, stop):
+
+        for k in range(self.layers):
+            for i in range(k, self.layers):
+                for j in range(self.smoothing_steps):
+                    out_ = out_ + self.extractors_down[k][i][j](f_ - self.mappings[i](out_))
+                out_list.append(out_)
+                n_out_ = self.feature_interpolations[i](out_)
+                n_out_list.append(n_out_)
+                f_ = self.data_interpolations[i](f_ - self.mappings[i](out_)) + self.mappings[
+                    i + 1
+                ](n_out_)
+                f_list.append(f_)
+                out_ = n_out_
+
+            if len(n_out_list) < self.layers:
+                addendum = [0] * (self.layers - len(n_out_list))
+                n_out_list = [*addendum, *n_out_list]
+                out_list = [*addendum, *out_list]
+                f_list = [*addendum, *f_list]
+
+            if k + 1 < self.layers:
+                for i in reversed(range(k + 1, self.layers)):
+                    out_part = self.prolongations[i](out_ - n_out_list[i])
+                    out_ = out_list[i] + out_part
+                    for j in range(self.smoothing_steps):
+                        out_ = out_ + self.extractors_up[k][i][j](
+                            f_list[i] - self.mappings[i](out_)
+                        )
+
+                f_ = f_list[k + 1]
+                out_list = []
+                n_out_list = []
+                f_list = [f_]
+        return out_, f_
+
+    def _mode_2_cycle(self, out):
+        f_ = out
+        out_ = out * 0
+        out_list = []
+        n_out_list = []
+        f_list = [f_]
+
+        for k in reversed(range(self.layers)):
+            for i in range(self.layers - k):
+                for j in range(self.smoothing_steps):
+                    out_ = out_ + self.extractors_down[k][i][j](f_ - self.mappings[i](out_))
+                out_list.append(out_)
+                n_out_ = self.feature_interpolations[i](out_)
+                n_out_list.append(n_out_)
+                f_ = self.data_interpolations[i](f_ - self.mappings[i](out_)) + self.mappings[
+                    i + 1
+                ](n_out_)
+                f_list.append(f_)
+                out_ = n_out_
+
+            if len(n_out_list) < self.layers:
+                addendum = [0] * (self.layers - len(n_out_list))
+                n_out_list = [*addendum, *n_out_list]
+                out_list = [*addendum, *out_list]
+                f_list = [*addendum, *f_list]
+
+            if k > 0:
+                for i in reversed(range(0, self.layers - k)):
+                    print(out_list[i].size())
+                    print(self.prolongations[i](out_ - n_out_list[i]).size())
+                    out_ = out_list[i] + self.prolongations[i](out_ - n_out_list[i])
+                    for j in range(self.smoothing_steps):
+                        out_ = out_ + self.extractors_up[len(self.extractors_up) - k][i][j](
+                            f_list[i] - self.mappings[i](out_)
+                        )
+
+                f_ = f_list[0]
+                out_list = []
+                n_out_list = []
+                f_list = [f_]
+        return out_, f_
+
+    def _cycle(self, out):
+        if self.mode == 1:
+            return self._mode_1_cycle(out)
+        elif self.mode == 2:
+            return self._mode_2_cycle(out)
+
+    def _forward_impl(self, x):
+        out = self.conv0(x)
+        out = self.bn0(out)
+        out = self.activation0(out)
+        out = self.maxpool(out)
+
+        out_, f_ = self._cycle(out)
+        """# regular down path from fine 16x16 grid to coarse 2x2
+        for i in range(self.layers):
             for j in range(self.smoothing_steps):
-                out_part = f_ - self.mappings[i](out_)
-                out_part2 = extractors[iterator][j](out_part)
-                out_ = out_ + out_part2
+                out_ = out_ + self.extractors[i][j](f_ - self.mappings[i](out_))
             out_list.append(out_)
             n_out_ = self.feature_interpolations[i](out_)
             n_out_list.append(n_out_)
@@ -291,82 +304,44 @@ class FASMGNet(MGNet):
             )
             f_list.append(f_)
             out_ = n_out_
-            iterator += 1
-        return out_, f_, out_list, n_out_list, f_list
 
-    def _cycle_up(self, extractors, start, stop, out_, out_list, n_out_list, f_list):
-        # print("CYCLING UP")
-        # print("IN SIZE")
-        # print(out_.size())
-        iterator = len(out_list) - 1
-        iterator_2 = len(extractors) - 1
-        for i in reversed(range(start, stop)):
-            print(i)
-            print(len(out_list))
-            out_ = out_list[iterator] + self.prolongations[i](out_ - n_out_list[iterator])
-            iterator = iterator - 1
-            # print("STEP SIZE")
-            # print(out_.size())
-            # print("STEP:", i)
+        # first upsampling to 8x8
+        for i in reversed(range(1, self.layers)):
+            out_ = out_list[i] + self.prolongations[i](out_ - n_out_list[i])
             for j in range(self.smoothing_steps):
-                out_ = out_ + extractors[iterator_2][j](f_list[i] - self.mappings[i](out_))
-            iterator_2 = iterator_2 - 1
-        return out_
+                out_ = out_ + self.extractors_2[i][j](f_list[i] - self.mappings[i](out_))
 
-    def _mode_cycle(self, out_, f_):
-        if self.mode == 1:
-            for i in range(len(self.extractors_down)):
-                out_, f_, out_list, n_out_list, f_list = self._cycle_down(
-                    self.extractors_down[i], i, self.layers, out_, f_
-                )
-                print(out_.size())
-                if i < len(self.extractors_up) + 1:
-                    out_ = self._cycle_up(
-                        self.extractors_up[i],
-                        i + 1,
-                        self.layers,
-                        out_,
-                        out_list,
-                        n_out_list,
-                        f_list,
-                    )
-                print(out_.size())
-                f_ = out_
-        elif self.mode == 3:
-            for i in range(len(self.extractors_down)):
-                out_, f_, out_list, n_out_list, f_list = self._cycle_down(
-                    self.extractors_down[i], i + 1, out_, f_
-                )
-                if i < len(self.extractors_up):
-                    out_ = self._cycle_up(
-                        self.extractors_up[i], i + 1, out_, out_list, n_out_list, f_list
-                    )
-        elif self.mode == 2:
-            out_, f_, out_list, n_out_list, f_list = self._cycle_down(
-                self.extractors_down[0], self.layers, out_, f_
+        f_ = f_list[1]
+
+        # down to 2x2
+        for i in range(1, self.layers):
+            for j in range(self.smoothing_steps):
+                out_ = out_ + self.extractors_3[i][j](f_ - self.mappings[i](out_))
+            n_out_ = self.feature_interpolations[i](out_)
+            f_ = self.data_interpolations[i](f_ - self.mappings[i](out_)) + self.mappings[i + 1](
+                n_out_
             )
-            for i in range(len(self.extractors_down) - 1):
-                out_, f_, out_list, n_out_list, f_list = self._cycle_down(
-                    self.extractors_down[i], i + 1, out_, f_
-                )
-                if i < len(self.extractors_up):
-                    out_ = self._cycle_up(
-                        self.extractors_up[i], i + 1, out_, out_list, n_out_list, f_list
-                    )
+            out_ = n_out_
 
-        return out_, f_
+        # up to 4x4
+        for i in reversed(range(2, self.layers)):
+            out_ = out_list[i] + self.prolongations[i](out_ - n_out_list[i])
+            for j in range(self.smoothing_steps):
+                out_ = out_ + self.extractors_4[i][j](f_list[i] - self.mappings[i](out_))
 
-    def _forward_impl(self, x):
+        f_ = f_list[2]
 
-        out = self.conv0(x)
-        out = self.bn0(out)
-        out = self.activation0(out)
-        out = self.maxpool(out)
-        f_ = out
-        out_ = out * 0
+        # down to 2x2
+        for i in range(2, self.layers):
+            for j in range(self.smoothing_steps):
+                out_ = out_ + self.extractors_5[i][j](f_ - self.mappings[i](out_))
+            n_out_ = self.feature_interpolations[i](out_)
+            f_ = self.data_interpolations[i](f_ - self.mappings[i](out_)) + self.mappings[i + 1](
+                n_out_
+            )
+            out_ = n_out_"""
 
-        out_, f_ = self._mode_cycle(out_, f_)
-
+        # return
         out = out_
         out = self.global_maxpool(out)
         out = torch.flatten(out, 1)
@@ -375,3 +350,8 @@ class FASMGNet(MGNet):
         out *= self.scale
 
         return out
+
+    def forward(self, x):
+        out = self._forward_impl(x)
+        return out
+
