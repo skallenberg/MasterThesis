@@ -10,6 +10,7 @@ config = Config.get_instance()
 
 data_name = config["Setup"]["Data"]
 alpha = config["Misc"]["CELU_alpha"]
+depthwise = config["Misc"]["Depthwise"]
 
 
 class BatchNorm(nn.BatchNorm2d):
@@ -66,34 +67,55 @@ class GhostBatchNorm(BatchNorm):
             )
 
 
-def initial_conv(channels_in):
+def initial_conv(channels_out):
     if data_name == "mnist":
         input_dim = 1
     else:
         input_dim = 3
-    return nn.Conv2d(input_dim, channels_in, kernel_size=7, stride=2, padding=3, bias=False)
+    if depthwise:
+        groups = channels_out
+    else:
+        groups = 1
+    return nn.Conv2d(
+        input_dim,
+        channels_out,
+        kernel_size=7,
+        stride=2,
+        padding=3,
+        bias=config["Misc"]["ConvolutionBias"],
+        groups=groups,
+    )
 
 
-def conv_3x3(channels_in, channels_out, stride=1, groups=1, dilation=1):
+def conv_3x3(channels_in, channels_out, stride=1, padding=1, groups=None):
+
+    if groups is None:
+        if depthwise and channels_out % channels_in == 0:
+            groups = channels_in
+        else:
+            groups = 1
     return nn.Conv2d(
         in_channels=channels_in,
         out_channels=channels_out,
         kernel_size=3,
         stride=stride,
-        padding=dilation,
-        dilation=dilation,
+        padding=padding,
         groups=groups,
-        bias=False,
+        bias=config["Misc"]["ConvolutionBias"],
     )
 
 
-def conv_1x1(channels_in, channels_out, stride=1, groups=1):
+def conv_1x1(channels_in, channels_out, stride=1):
+    if depthwise and channels_out % channels_in == 0:
+        groups = channels_in
+    else:
+        groups = 1
     return nn.Conv2d(
         in_channels=channels_in,
         out_channels=channels_out,
         kernel_size=1,
         stride=stride,
-        bias=False,
+        bias=config["Misc"]["ConvolutionBias"],
         groups=groups,
     )
 
@@ -108,14 +130,115 @@ else:
     V, W = compute_eigenvalues()
 
 
-def whitening_block(c_in, c_out, eps=1e-2):
-    filt = nn.Conv2d(3, 27, kernel_size=(3, 3), padding=(1, 1), bias=False)
+def WhiteningBlock(c_out, eps=1e-2):
+    if config["Setup"]["Data"] == "mnist":
+        c_in = 1
+    else:
+        c_in = 3
+
+    filt = nn.Conv2d(
+        c_in, 27, kernel_size=(3, 3), padding=(1, 1), bias=config["Misc"]["ConvolutionBias"],
+    )
     filt.weight.data = W / torch.sqrt(V + eps)[:, None, None, None]
     filt.weight.requires_grad = False
 
+    if config["Misc"]["GhostBatchNorm"]:
+        bn = GhostBatchNorm(c_out, config["DataLoader"]["BatchSize"] // 32)
+    else:
+        bn = nn.BatchNorm2d(c_out)
+    if config["Misc"]["UseCELU"]:
+        act = nn.CELU(alpha)
+    else:
+        act = nn.ReLU(inplace=True)
+
     return nn.Sequential(
         filt,
-        nn.Conv2d(27, c_out, kernel_size=(1, 1), bias=False),
-        GhostBatchNorm(c_out, 2),
-        nn.CELU(alpha),
+        nn.Conv2d(27, c_out, kernel_size=(1, 1), bias=config["Misc"]["ConvolutionBias"]),
+        bn,
+        act,
     )
+
+
+def init_block(channels_out):
+    if config["Misc"]["WhiteningBlock"]:
+        conv = WhiteningBlock(channels_out)
+    else:
+        conv = initial_conv(channels_out)
+    if config["Misc"]["GhostBatchNorm"]:
+        bn = GhostBatchNorm(channels_out, config["DataLoader"]["BatchSize"] // 32)
+    else:
+        bn = nn.BatchNorm2d(channels_out)
+    if config["Misc"]["UseCELU"]:
+        act = nn.CELU(alpha)
+    else:
+        act = nn.ReLU(inplace=True)
+    return nn.Sequential(*[conv, bn, act])
+
+
+def conv_bn_act(channels_in, channels_out, stride=1, extra=config["Misc"]["TwoConvsPerBlock"]):
+    if stride > 1:
+        if config["Misc"]["StrideToPooling"]:
+            conv = conv_3x3(channels_in, channels_out)
+            mpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        else:
+            conv = conv_3x3(channels_in, channels_out, stride=stride)
+            mpool = nn.Identity()
+    else:
+        conv = conv_3x3(channels_in, channels_out)
+        mpool = nn.Identity()
+
+    if config["Misc"]["GhostBatchNorm"]:
+        bn = GhostBatchNorm(channels_out, config["DataLoader"]["BatchSize"] // 32)
+    else:
+        bn = nn.BatchNorm2d(channels_out)
+
+    if config["Misc"]["UseCELU"]:
+        act = nn.CELU(alpha)
+    else:
+        act = nn.ReLU(inplace=True)
+
+    if extra:
+        extra = conv_bn_act(channels_out, channels_out, extra=False)
+    else:
+        extra = nn.Identity()
+
+    if config["Misc"]["PoolBeforeBN"]:
+        return nn.Sequential(*[conv, mpool, bn, act, extra])
+    else:
+        return nn.Sequential(*[conv, bn, act, mpool, extra])
+
+
+def conv_bn_act_bottleneck(channels_in, channels_out, stride=1):
+    if stride > 1:
+        if config["Misc"]["StrideToPooling"]:
+            conv_1 = conv_1x1(channels_in, channels_out)
+            mpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        else:
+            conv_1 = conv_1x1(channels_in, channels_out, stride=stride)
+            mpool = nn.Identity()
+    else:
+        conv_1 = conv_1x1(channels_in, channels_out)
+        mpool = nn.Identity()
+
+    conv_2 = conv_3x3(channels_out, channels_out)
+    conv_3 = conv_1x1(channels_out, channels_out * 4)
+
+    if config["Misc"]["GhostBatchNorm"]:
+        bn_1 = GhostBatchNorm(channels_out, config["DataLoader"]["BatchSize"] // 32)
+        bn_2 = GhostBatchNorm(channels_out, config["DataLoader"]["BatchSize"] // 32)
+        bn_3 = GhostBatchNorm(channels_out * 4, config["DataLoader"]["BatchSize"] // 32)
+    else:
+        bn_1 = nn.BatchNorm2d(channels_out)
+        bn_2 = nn.BatchNorm2d(channels_out)
+        bn_3 = nn.BatchNorm2d(channels_out * 3)
+
+    if config["Misc"]["UseCELU"]:
+        act = nn.CELU(alpha)
+    else:
+        act = nn.ReLU(inplace=True)
+
+    if config["Misc"]["PoolBeforeBN"]:
+        return nn.Sequential(*[conv_1, mpool, bn_1, act, conv_2, bn_2, act, conv_3, bn_3, act])
+    else:
+        return nn.Sequential(*[conv_1, bn_1, act, mpool, conv_2, bn_2, act, conv_3, bn_3, act])
+
