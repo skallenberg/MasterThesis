@@ -7,16 +7,16 @@ from utils.config import Config
 
 from .utils import *
 
-config = Config.get_instance()
-
-alpha = config["Misc"]["CELU_alpha"]
-
 
 class mapping_block(nn.Module):
     def __init__(self, channels_in, batch_norm=False):
         super().__init__()
+        self.config = Config().get_instance()
         self.conv0 = conv_3x3(channels_in, channels_in)
-        self.act0 = nn.ReLU(inplace=True)
+        if self.config["Misc"]["UseCELU"]:
+            self.act0 = nn.CELU(self.config["Misc"]["CELU_alpha"])
+        else:
+            self.act0 = nn.ReLU(inplace=True)
         self.conv1 = conv_3x3(channels_in, channels_in)
         self.batch_norm = batch_norm
         if self.batch_norm:
@@ -44,11 +44,20 @@ class mapping_block(nn.Module):
 class extractor_block(nn.Module):
     def __init__(self, channels_in, batch_norm=False):
         super().__init__()
+        self.config = Config().get_instance()
         self.conv0 = conv_3x3(channels_in, channels_in)
-        self.act0 = nn.ReLU(inplace=True)
+        if self.config["Misc"]["UseCELU"]:
+            self.act0 = nn.CELU(self.config["Misc"]["CELU_alpha"])
+        else:
+            self.act0 = nn.ReLU(inplace=True)
         self.batch_norm = batch_norm
         if self.batch_norm:
-            self.bn0 = nn.BatchNorm2d(channels_in)
+            if self.config["Misc"]["GhostBatchNorm"]:
+                self.bn0 = GhostBatchNorm(
+                    channels_in, self.config["DataLoader"]["BatchSize"] // 32
+                )
+            else:
+                self.bn0 = nn.BatchNorm2d(channels_in)
 
     def _forward_impl(self, x):
         if self.batch_norm:

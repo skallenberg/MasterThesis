@@ -9,8 +9,6 @@ from ignite.engine import Events
 from utils import set_trainer
 from utils.config import Config
 
-config = Config.get_instance()
-
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
 else:
@@ -29,6 +27,8 @@ tb_metrics = [
 
 
 def train(net, dataset):
+
+    config = Config().get_instance()
 
     if torch.cuda.device_count() > 1:
         writer_name = (

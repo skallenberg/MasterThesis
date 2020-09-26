@@ -6,10 +6,6 @@ import torch
 from utils.config import Config
 from utils.data_utils import *
 
-config = Config.get_instance()
-
-data_name = config["Setup"]["Data"]
-
 
 class dataset:
     def __init__(self, name, trainloader, testloader, classes, train_set=None, valid_set=None):
@@ -22,6 +18,9 @@ class dataset:
 
 
 def get_data(return_sets=False):
+    config = Config().get_instance()
+
+    data_name = config["Setup"]["Data"]
     if data_name == "cifar10":
         data = cifar10()
         cifar10_mean, cifar10_std = [

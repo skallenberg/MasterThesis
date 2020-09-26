@@ -9,9 +9,6 @@ from .blocks import *
 
 from utils.config import Config
 
-config = Config.get_instance()
-alpha = config["Misc"]["CELU_alpha"]
-
 
 class DenseNet(BaseNet):
     def __init__(
@@ -36,13 +33,13 @@ class DenseNet(BaseNet):
                 hidden_layers.append(self._transition(nfeats, int(nfeats / 2)))
                 nfeats = int(nfeats / 2)
 
-        if config["Misc"]["GhostBatchNorm"]:
-            self.bnf = GhostBatchNorm(nfeats, config["DataLoader"]["BatchSize"] // 32)
+        if self.config["Misc"]["GhostBatchNorm"]:
+            self.bnf = GhostBatchNorm(nfeats, self.config["DataLoader"]["BatchSize"] // 32)
         else:
             self.bnf = nn.BatchNorm2d(nfeats)
 
-        if config["Misc"]["UseCELU"]:
-            self.activationf = nn.CELU(alpha)
+        if self.config["Misc"]["UseCELU"]:
+            self.activationf = nn.CELU(self.config["Misc"]["CELU_alpha"])
         else:
             self.activationf = nn.ReLU(inplace=True)
 
@@ -62,13 +59,13 @@ class DenseNet(BaseNet):
         return block
 
     def _transition(self, channels_in, channels_out):
-        if config["Misc"]["GhostBatchNorm"]:
-            bn = GhostBatchNorm(channels_in, config["DataLoader"]["BatchSize"] // 32)
+        if self.config["Misc"]["GhostBatchNorm"]:
+            bn = GhostBatchNorm(channels_in, self.config["DataLoader"]["BatchSize"] // 32)
         else:
             bn = nn.BatchNorm2d(channels_in)
 
-        if config["Misc"]["UseCELU"]:
-            act = nn.CELU(alpha)
+        if self.config["Misc"]["UseCELU"]:
+            act = nn.CELU(self.config["Misc"]["CELU_alpha"])
         else:
             act = nn.ReLU(inplace=True)
 

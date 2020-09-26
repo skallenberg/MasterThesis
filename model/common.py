@@ -6,12 +6,6 @@ from utils.config import Config
 from utils.eigenval import compute_eigenvalues
 import os
 
-config = Config.get_instance()
-
-data_name = config["Setup"]["Data"]
-alpha = config["Misc"]["CELU_alpha"]
-depthwise = config["Misc"]["Depthwise"]
-
 
 class BatchNorm(nn.BatchNorm2d):
     def __init__(self, num_features, eps=1e-05, momentum=0.1, weight=True, bias=True):
@@ -68,11 +62,13 @@ class GhostBatchNorm(BatchNorm):
 
 
 def initial_conv(channels_out):
-    if data_name == "mnist":
+    config = Config().get_instance()
+
+    if config["Setup"]["Data"] == "mnist":
         input_dim = 1
     else:
         input_dim = 3
-    if depthwise:
+    if config["Misc"]["Depthwise"]:
         groups = channels_out
     else:
         groups = 1
@@ -88,9 +84,10 @@ def initial_conv(channels_out):
 
 
 def conv_3x3(channels_in, channels_out, stride=1, padding=1, groups=None):
+    config = Config().get_instance()
 
     if groups is None:
-        if depthwise and channels_out % channels_in == 0:
+        if config["Misc"]["Depthwise"] and channels_out % channels_in == 0:
             groups = channels_in
         else:
             groups = 1
@@ -106,7 +103,9 @@ def conv_3x3(channels_in, channels_out, stride=1, padding=1, groups=None):
 
 
 def conv_1x1(channels_in, channels_out, stride=1):
-    if depthwise and channels_out % channels_in == 0:
+    config = Config().get_instance()
+
+    if config["Misc"]["Depthwise"] and channels_out % channels_in == 0:
         groups = channels_in
     else:
         groups = 1
@@ -120,17 +119,18 @@ def conv_1x1(channels_in, channels_out, stride=1):
     )
 
 
-base_path = "./data/datasets/eigenvals/" + config["Setup"]["Data"]
-eigen_path_1 = base_path + "_1.pt"
-eigen_path_2 = base_path + "_2.pt"
-if os.path.isfile(eigen_path_1) and os.path.isfile(eigen_path_2):
-    V = torch.load(eigen_path_1)
-    W = torch.load(eigen_path_2)
-else:
-    V, W = compute_eigenvalues()
-
-
 def WhiteningBlock(c_out, eps=1e-2):
+    config = Config().get_instance()
+
+    base_path = "./data/datasets/eigenvals/" + config["Setup"]["Data"]
+    eigen_path_1 = base_path + "_1.pt"
+    eigen_path_2 = base_path + "_2.pt"
+    if os.path.isfile(eigen_path_1) and os.path.isfile(eigen_path_2):
+        V = torch.load(eigen_path_1)
+        W = torch.load(eigen_path_2)
+    else:
+        V, W = compute_eigenvalues()
+
     if config["Setup"]["Data"] == "mnist":
         c_in = 1
     else:
@@ -147,7 +147,7 @@ def WhiteningBlock(c_out, eps=1e-2):
     else:
         bn = nn.BatchNorm2d(c_out)
     if config["Misc"]["UseCELU"]:
-        act = nn.CELU(alpha)
+        act = nn.CELU(config["Misc"]["CELU_alpha"])
     else:
         act = nn.ReLU(inplace=True)
 
@@ -160,6 +160,8 @@ def WhiteningBlock(c_out, eps=1e-2):
 
 
 def init_block(channels_out):
+    config = Config().get_instance()
+
     if config["Misc"]["WhiteningBlock"]:
         conv = WhiteningBlock(channels_out)
     else:
@@ -169,13 +171,18 @@ def init_block(channels_out):
     else:
         bn = nn.BatchNorm2d(channels_out)
     if config["Misc"]["UseCELU"]:
-        act = nn.CELU(alpha)
+        act = nn.CELU(config["Misc"]["CELU_alpha"])
     else:
         act = nn.ReLU(inplace=True)
     return nn.Sequential(*[conv, bn, act])
 
 
-def conv_bn_act(channels_in, channels_out, stride=1, extra=config["Misc"]["TwoConvsPerBlock"]):
+def conv_bn_act(channels_in, channels_out, stride=1, extra=None):
+    config = Config().get_instance()
+
+    if extra is None:
+        extra = config["Misc"]["TwoConvsPerBlock"]
+
     if stride > 1:
         if config["Misc"]["StrideToPooling"]:
             conv = conv_3x3(channels_in, channels_out)
@@ -193,7 +200,7 @@ def conv_bn_act(channels_in, channels_out, stride=1, extra=config["Misc"]["TwoCo
         bn = nn.BatchNorm2d(channels_out)
 
     if config["Misc"]["UseCELU"]:
-        act = nn.CELU(alpha)
+        act = nn.CELU(config["Misc"]["CELU_alpha"])
     else:
         act = nn.ReLU(inplace=True)
 
@@ -209,6 +216,8 @@ def conv_bn_act(channels_in, channels_out, stride=1, extra=config["Misc"]["TwoCo
 
 
 def conv_bn_act_bottleneck(channels_in, channels_out, stride=1):
+    config = Config().get_instance()
+
     if stride > 1:
         if config["Misc"]["StrideToPooling"]:
             conv_1 = conv_1x1(channels_in, channels_out)
@@ -233,7 +242,7 @@ def conv_bn_act_bottleneck(channels_in, channels_out, stride=1):
         bn_3 = nn.BatchNorm2d(channels_out * 3)
 
     if config["Misc"]["UseCELU"]:
-        act = nn.CELU(alpha)
+        act = nn.CELU(config["Misc"]["CELU_alpha"])
     else:
         act = nn.ReLU(inplace=True)
 

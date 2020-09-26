@@ -8,7 +8,7 @@ import ignite_training
 from utils import load_data, set_config, visualize
 from utils.config import Config
 
-config = Config.get_instance()
+config = Config().get_instance()
 
 torch.backends.cudnn.enabled = config["Misc"]["cudnnEnabled"]
 torch.backends.cudnn.benchmark = config["Misc"]["cudnnBenchmark"]

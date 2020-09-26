@@ -9,8 +9,6 @@ from torch.utils.tensorboard import SummaryWriter
 from utils import load_data
 from utils.config import Config
 
-config = Config.get_instance()
-
 # matplotlib.use("Qt5Agg")
 
 if torch.cuda.is_available():
@@ -20,6 +18,8 @@ else:
 
 
 def rev_normalize(img):
+    config = Config().get_instance()
+
     if config["Setup"]["Data"] == "cifar10":
         std = [0.24703233, 0.24348505, 0.26158768]
         mean = [0.49139968, 0.48215827, 0.44653124]

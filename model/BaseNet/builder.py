@@ -2,15 +2,14 @@ from .blocks import *
 from .net import BaseNet
 from utils.config import Config
 
-config = Config.get_instance()
 
-if config["Setup"]["Data"] == "cifar100":
-    num_classes = 100
-else:
-    num_classes = 10
+def _basenet(name, block_type, layers, **kwargs):
+    config = Config().get_instance()
 
-
-def _basenet(name, block_type, layers, num_classes=num_classes, **kwargs):
+    if config["Setup"]["Data"] == "cifar100":
+        num_classes = 100
+    else:
+        num_classes = 10
     model = BaseNet(
         name=name, block_type=block_type, layers=layers, num_classes=num_classes, **kwargs
     )

@@ -7,14 +7,14 @@ from model.common import *
 from .blocks import *
 from utils.config import Config
 
-config = Config.get_instance()
-
 
 class BaseNet(nn.Module):
     def __init__(
         self, name, block_type, layers, num_classes,
     ):
         super().__init__()
+
+        self.config = Config().get_instance()
 
         self.name = name
         self.writer = ""
@@ -31,12 +31,12 @@ class BaseNet(nn.Module):
         self.global_maxpool = nn.AdaptiveMaxPool2d((1, 1))
         self.fc = nn.Linear(self.block_type.expansion * 64 * (2 ** (len(layers) - 1)), num_classes)
 
-        self.scale = config["Misc"]["FC_Scale"]
+        self.scale = self.config["Misc"]["FC_Scale"]
 
         self._init_modules()
 
     def _init_modules(self):
-        if config["Misc"]["UseCELU"]:
+        if self.config["Misc"]["UseCELU"]:
             nonlinearity = "leaky_relu"
         else:
             nonlinearity = "relu"
@@ -44,7 +44,7 @@ class BaseNet(nn.Module):
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity=nonlinearity)
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
-                if config["Misc"]["GhostBatchNorm"]:
+                if self.config["Misc"]["GhostBatchNorm"]:
                     pass
                 else:
                     nn.init.constant_(m.weight, 1)

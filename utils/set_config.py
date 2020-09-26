@@ -4,13 +4,11 @@ from model import *
 
 from utils.config import Config
 
-config = Config.get_instance()
-
-opt = config["Optimizer"]["Type"]
-arch = config["Setup"]["Architecture"]
-
 
 def choose_optimizer(net):
+    config = Config().get_instance()
+
+    opt = config["Optimizer"]["Type"]
     if opt == "SGD":
         return optim.SGD(
             net.parameters(),
@@ -44,6 +42,8 @@ def choose_optimizer(net):
 
 
 def choose_architecture():
+    config = Config().get_instance()
+    arch = config["Setup"]["Architecture"]
 
     try:
         return eval(arch + "()")

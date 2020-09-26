@@ -11,9 +11,6 @@ import numpy as np
 
 from utils.config import Config
 
-config = Config.get_instance()
-alpha = config["Misc"]["CELU_alpha"]
-
 
 class FractalNet(BaseNet):
     def __init__(
@@ -67,13 +64,13 @@ class FractalNet(BaseNet):
         return block
 
     def _transition(self, channels_in, pool=True):
-        if config["Misc"]["GhostBatchNorm"]:
-            bn = GhostBatchNorm(channels_in, config["DataLoader"]["BatchSize"] // 32)
+        if self.config["Misc"]["GhostBatchNorm"]:
+            bn = GhostBatchNorm(channels_in, self.config["DataLoader"]["BatchSize"] // 32)
         else:
             bn = nn.BatchNorm2d(channels_in)
 
-        if config["Misc"]["UseCELU"]:
-            act = nn.CELU(alpha)
+        if self.config["Misc"]["UseCELU"]:
+            act = nn.CELU(self.config["Misc"]["CELU_alpha"])
         else:
             act = nn.ReLU(inplace=True)
         mpool = nn.MaxPool2d(2, stride=1, padding=1)

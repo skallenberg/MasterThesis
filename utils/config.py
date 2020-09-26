@@ -4,51 +4,22 @@ from pathlib import Path
 
 import tomlkit as toml
 from packaging import version
+import tomlkit
 
 
-class Config(collections.MutableMapping):
-    _instance = None
-    _store: t.MutableMapping[str, t.Any]
-    _file = Path("config.toml")
-    _template = Path("config-example.toml")
-
-    @classmethod
-    def get_instance(cls):
-        """ Static access method. """
-        if cls._instance is None:
-            cls()
-        return cls._instance
-
+class Config:
     def __init__(self):
-        """ Private constructor."""
-        if Config._instance is not None:
-            raise RuntimeError("This class is a singleton!")
-        else:
-            Config._instance = self
-            with self._file.open() as f:
-                self._store = toml.parse(f.read())
-            f.close()
+        self._file = Path("config.toml")
 
-    def __getitem__(self, key):
-        return self._store[key]
+    def get_instance(self):
+        with self._file.open() as f:
+            toml_dict = toml.parse(f.read())
+        f.close()
+        return toml_dict
 
-    def __setitem__(self, key, value):
-        self._store[key] = value
-
-    def __delitem__(self, key):
-        del self._store[key]
-
-    def __iter__(self):
-        return iter(self._store)
-
-    def __len__(self):
-        return len(self._store)
-
-    def __repr__(self):
-        return repr(self._store)
-
-    def __str__(self):
-        return str(self._store)
-
-
-config = Config.get_instance()
+    def change_value(self, key, subkey, value):
+        current = self.get_instance()
+        current[key][subkey] = value
+        with self._file.open("w") as f:
+            f.write(tomlkit.dumps(current))
+        f.close()

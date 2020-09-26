@@ -9,11 +9,6 @@ from utils import set_config
 from utils import visualize
 from utils.config import Config
 
-config = Config.get_instance()
-
-torch.backends.cudnn.enabled = config["Misc"]["cudnnEnabled"]
-torch.backends.cudnn.benchmark = config["Misc"]["cudnnBenchmark"]
-
 logging.basicConfig(level=logging.INFO)
 
 if torch.cuda.is_available():
@@ -23,28 +18,29 @@ else:
     device = torch.device("cpu")
     logging.info("Running on CPU")
 
-data = load_data.get_data()
 
-logging.info("Loaded Dataset")
+def train_model(visualize_graph=False):
+    config = Config().get_instance()
+    torch.backends.cudnn.enabled = config["Misc"]["cudnnEnabled"]
+    torch.backends.cudnn.benchmark = config["Misc"]["cudnnBenchmark"]
 
-net = set_config.choose_architecture()
+    data = load_data.get_data()
 
-if torch.cuda.device_count() > 1:
-    net = nn.DistributedDataParallel(net)
-net = net.to(device)
+    logging.info("Loaded Dataset")
 
+    net = set_config.choose_architecture()
 
-logging.info("Initialized Network")
+    if torch.cuda.device_count() > 1:
+        net = nn.DistributedDataParallel(net)
+    net = net.to(device)
 
-# visualize.make_graph(net)
+    logging.info("Initialized Network")
 
-net = ignite_training.train(net, data)
+    if visualize_graph:
+        visualize.make_graph(net)
+    else:
+        net = ignite_training.train(net, data)
 
-logging.info("Finished Training")
+    logging.info("Finished Run")
 
-# utils.visualize.show(data, nimages=4, net=net)
-
-# mode.test(net, data)
-
-logging.info("Finished Testing")
-logging.info("Run succesfull")
+    logging.info("Run successfull")

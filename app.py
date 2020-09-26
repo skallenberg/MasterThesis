@@ -21,7 +21,7 @@ torch.backends.cudnn.benchmark = True
 
 st.set_option("deprecation.showfileUploaderEncoding", False)
 
-config = Config.get_instance()
+config = Config().get_instance()
 
 st.title("Master Thesis WebApp")
 

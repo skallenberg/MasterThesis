@@ -3,25 +3,36 @@ from model.BaseNet.blocks import *
 from .net import *
 from utils.config import Config
 
-config = Config.get_instance()
 
-if config["Setup"]["Data"] == "cifar100":
-    num_classes = 100
-else:
-    num_classes = 10
+def _MGNet(name, layers, **kwargs):
+    config = Config().get_instance()
 
-
-def _MGNet(name, layers, num_classes=num_classes, **kwargs):
+    if config["Setup"]["Data"] == "cifar100":
+        num_classes = 100
+    else:
+        num_classes = 10
     model = MGNet(name, layers, num_classes, **kwargs)
     return model
 
 
-def _FASMGNet(name, layers, num_classes=num_classes, **kwargs):
+def _FASMGNet(name, layers, **kwargs):
+    config = Config().get_instance()
+
+    if config["Setup"]["Data"] == "cifar100":
+        num_classes = 100
+    else:
+        num_classes = 10
     model = FASMGNet(name, layers, num_classes, **kwargs)
     return model
 
 
-def _VMGNet(name, layers, num_classes=num_classes, **kwargs):
+def _VMGNet(name, layers, **kwargs):
+    config = Config().get_instance()
+
+    if config["Setup"]["Data"] == "cifar100":
+        num_classes = 100
+    else:
+        num_classes = 10
     model = VMGNet(name, layers, num_classes, **kwargs)
     return model
 

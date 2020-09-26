@@ -21,20 +21,10 @@ from utils.config import Config
 from utils.cross_entropy import CrossEntropyLoss
 from utils.mixup import *
 
-config = Config.get_instance()
-
-MixedPrecision = config["Trainer"]["MixedPrecision"]
-MixUpData = config["Trainer"]["MixUp"]
-
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
 else:
     device = torch.device("cpu")
-
-if config["Trainer"]["LabelSmoothing"]:
-    criterion = CrossEntropyLoss(smooth_eps=0.2).to(device)
-else:
-    criterion = torch.nn.CrossEntropyLoss().to(device)
 
 
 def score_fn(engine):
@@ -54,19 +44,28 @@ def dict_to_pair(data, **kwargs):
     return inp, tar
 
 
-val_metrics = {
-    "Accuracy": metrics.Accuracy(),
-    "Running_Average_Accuracy": metrics.RunningAverage(metrics.Accuracy()),
-    "Loss": metrics.Loss(criterion),
-    "Running_Average_Loss": metrics.RunningAverage(metrics.Loss(criterion)),
-    "Precision": metrics.Precision(average=True),
-    "Recall": metrics.Recall(average=True),
-    "F1-Score": metrics.Fbeta(beta=1.0),
-    "ROC_AUC": ROC_AUC(output_transform=activated_output_transform),
-}
+def _set_metrics():
+    if config["Trainer"]["LabelSmoothing"]:
+        criterion = CrossEntropyLoss(smooth_eps=0.2).to(device)
+    else:
+        criterion = torch.nn.CrossEntropyLoss().to(device)
+    val_metrics = {
+        "Accuracy": metrics.Accuracy(),
+        "Running_Average_Accuracy": metrics.RunningAverage(metrics.Accuracy()),
+        "Loss": metrics.Loss(criterion),
+        "Running_Average_Loss": metrics.RunningAverage(metrics.Loss(criterion)),
+        "Precision": metrics.Precision(average=True),
+        "Recall": metrics.Recall(average=True),
+        "F1-Score": metrics.Fbeta(beta=1.0),
+        "ROC_AUC": ROC_AUC(output_transform=activated_output_transform),
+    }
+    return val_metrics, criterion
 
 
-def _set_amp_trainer(net, dataset, optimizer):
+def _set_amp_trainer(net, dataset, optimizer, criterion):
+    config = Config().get_instance()
+
+    MixUpData = config["Trainer"]["MixUp"]
     scaler = GradScaler()
 
     def train_step(engine, batch):
@@ -110,11 +109,16 @@ def _set_mixup_trainer(net, dataset, optimizer):
 
 
 def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False):
+    config = Config().get_instance()
+
+    MixedPrecision = config["Trainer"]["MixedPrecision"]
 
     optimizer = set_config.choose_optimizer(net)
 
+    val_metrics, criterion = _set_metrics()
+
     if MixedPrecision:
-        trainer = _set_amp_trainer(net, dataset, optimizer)
+        trainer = _set_amp_trainer(net, dataset, optimizer, criterion)
     else:
         trainer = create_supervised_trainer(net, optimizer, criterion)
     train_evaluator = create_supervised_evaluator(

@@ -15,7 +15,7 @@ from ignite.contrib.handlers import ProgressBar
 from ignite.metrics import Accuracy, Loss
 from ignite.handlers import Timer
 
-config = Config.get_instance()
+config = Config().get_instance()
 
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
