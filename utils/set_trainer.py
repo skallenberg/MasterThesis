@@ -105,14 +105,35 @@ def _set_amp_trainer(net, dataset, optimizer, criterion):
     return trainer
 
 
-def _set_mixup_trainer(net, dataset, optimizer):
-    return 1
+def _set_mixup_trainer(net, dataset, optimizer, criterion):
+    config = Config().get_instance()
+
+    def train_step(engine, batch):
+        x, y = batch["input"], batch["target"]
+
+        optimizer.zero_grad()
+
+        x, y_a, y_b, lam = mixup_data(x, y, 0.4)
+        x, y_a, y_b = map(torch.autograd.Variable, (x, y_a, y_b))
+        y_pred = net(x)
+        loss = mixup_criterion(criterion, y_pred, y_a, y_b, lam)
+
+        loss.backward()
+
+        optimizer.step()
+
+        return loss.item()
+
+    trainer = Engine(train_step)
+
+    return trainer
 
 
 def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False):
     config = Config().get_instance()
 
     MixedPrecision = config["Trainer"]["MixedPrecision"]
+    MixUp = config["Trainer"]["MixUp"]
 
     optimizer = set_config.choose_optimizer(net)
 
@@ -120,8 +141,11 @@ def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False)
 
     if MixedPrecision:
         trainer = _set_amp_trainer(net, dataset, optimizer, criterion)
+    elif MixUp:
+        trainer = _set_mixup_trainer(net, dataset, optimizer, criterion)
     else:
         trainer = create_supervised_trainer(net, optimizer, criterion)
+
     train_evaluator = create_supervised_evaluator(
         net, metrics=val_metrics, device=device, prepare_batch=dict_to_pair, non_blocking=True
     )
@@ -152,9 +176,9 @@ def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False)
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
     timer = Timer(average=True)
-    timer.attach(trainer, step=Events.EPOCH_COMPLETED)
+    timer.attach(trainer, step=Events.EPOCH_COMPLETED(every=50))
 
-    @trainer.on(Events.EPOCH_COMPLETED)
+    @trainer.on(Events.EPOCH_COMPLETED(every=50))
     def log_training_results(engine):
         train_evaluator.run(dataset.trainloader)
         metrics = train_evaluator.state.metrics
@@ -173,7 +197,7 @@ def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False)
             )
         )
 
-    @trainer.on(Events.EPOCH_COMPLETED)
+    @trainer.on(Events.EPOCH_COMPLETED(every=50))
     def log_validation_results(engine):
         test_evaluator.run(dataset.testloader)
         metrics = test_evaluator.state.metrics

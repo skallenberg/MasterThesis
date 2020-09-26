@@ -1,12 +1,12 @@
 import run
-import pandas as pd
 from utils.config import Config
 import logging
+import sys
 
 logging.basicConfig(level=logging.INFO)
 
 model_list = [
-    "BaseNetTest",
+    "BaseTest",
     "BaseNet34",
     "ResBaseTest",
     "ResNet34",
@@ -22,6 +22,9 @@ model_list = [
     "FASMGNetTest1",
     "FASMGNetTest2",
     "MGNet34",
+    "MAN_Test",
+    "MG16",
+    "PMG16",
 ]
 MixedPrecision_Options = [True, False]
 MixUp_Options = [True, False]
@@ -36,8 +39,10 @@ TwoConvsPerBlock_Options = [True, False]
 PoolBeforeBN_Options = [True, False]
 
 for model in model_list:
+    logging.info("\n\n############## NEW MODEL ###################\n\n")
     Config().change_value("Setup", "Architecture", model)
     logging.info("Using Model:\t%s" % (model))
+
     for MixedPrec in MixedPrecision_Options:
         Config().change_value("Trainer", "MixedPrecision", MixedPrec)
         logging.info("Using MixedPrecision:\t%s" % (MixedPrec))
@@ -87,3 +92,4 @@ for model in model_list:
                                                     run.train_model()
                                                 except:
                                                     logging.info("Run Failed")
+
