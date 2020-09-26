@@ -1,8 +1,15 @@
 from .blocks import *
 from .net import DenseNet
+from utils.config import Config
 
 
-def _densenet(name, block_type, layers, num_classes=10):
+def _densenet(name, block_type, layers):
+    config = Config().get_instance()
+
+    if config["Setup"]["Data"] == "cifar100":
+        num_classes = 100
+    else:
+        num_classes = 10
     model = DenseNet(name, block_type, layers, num_classes=num_classes)
     return model
 

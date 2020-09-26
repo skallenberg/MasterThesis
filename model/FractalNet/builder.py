@@ -1,11 +1,18 @@
 from model.BaseNet.blocks import *
 
 from .net import FractalNet
+from utils.config import Config
 
 
 def _fractal_net(
-    name, block_type, layers, fractal_expansion=4, num_classes=10, drop_path=False,
+    name, block_type, layers, fractal_expansion=4, drop_path=False,
 ):
+    config = Config().get_instance()
+
+    if config["Setup"]["Data"] == "cifar100":
+        num_classes = 100
+    else:
+        num_classes = 10
     model = FractalNet(
         name,
         block_type,

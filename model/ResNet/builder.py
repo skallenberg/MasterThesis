@@ -1,8 +1,15 @@
 from .blocks import *
 from .net import ResNet
+from utils.config import Config
 
 
-def _resnet(name, block_type, layers, num_classes=10, **kwargs):
+def _resnet(name, block_type, layers, **kwargs):
+    config = Config().get_instance()
+
+    if config["Setup"]["Data"] == "cifar100":
+        num_classes = 100
+    else:
+        num_classes = 10
     model = ResNet(name, block_type, layers, num_classes, **kwargs)
     return model
 
@@ -13,10 +20,6 @@ def ResBaseTest():
 
 def ResBottleTest():
     return _resnet("ResBottleTest", residual_bottleneck_block, [1, 1])
-
-
-def StochasticDepthTest():
-    return _resnet("ResBaseTest", residual_base_block, [1, 1], sd="prog")
 
 
 def ResNet34():

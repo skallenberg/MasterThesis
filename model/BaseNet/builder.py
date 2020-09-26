@@ -17,7 +17,7 @@ def _basenet(name, block_type, layers, **kwargs):
 
 
 def BaseTest(**kwargs):
-    return _basenet("BaseTest", base_block, [1, 2, 1, 1], **kwargs)
+    return _basenet("BaseTest", base_block, [1, 1, 1, 1], **kwargs)
 
 
 def BottleTest(**kwargs):
