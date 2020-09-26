@@ -72,18 +72,18 @@ def _set_amp_trainer(net, dataset, optimizer):
     def train_step(engine, batch):
         x, y = batch["input"], batch["target"]
 
+        optimizer.zero_grad()
+
         if MixUpData:
             x, y_a, y_b, lam = mixup_data(x, y, 0.4)
             x, y_a, y_b = map(torch.autograd.Variable, (x, y_a, y_b))
-
-        optimizer.zero_grad()
-
-        # Runs the forward pass with autocasting.
-        with autocast():
-            y_pred = net(x)
-            if MixUpData:
+            with autocast():
+                y_pred = net(x)
                 loss = mixup_criterion(criterion, y_pred, y_a, y_b, lam)
-            else:
+        else:
+            # Runs the forward pass with autocasting.
+            with autocast():
+                y_pred = net(x)
                 loss = criterion(y_pred, y)
         # Scales loss.  Calls backward() on scaled loss to create scaled gradients.
         # Backward passes under autocast are not recommended.

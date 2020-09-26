@@ -2,11 +2,10 @@ import logging
 
 import torch
 import torch.nn as nn
+import tomlkit
 
 import ignite_training
-from utils import load_data
-from utils import set_config
-from utils import visualize
+from utils import load_data, set_config, visualize
 from utils.config import Config
 
 config = Config.get_instance()
@@ -15,6 +14,18 @@ torch.backends.cudnn.enabled = config["Misc"]["cudnnEnabled"]
 torch.backends.cudnn.benchmark = config["Misc"]["cudnnBenchmark"]
 
 logging.basicConfig(level=logging.INFO)
+
+net = set_config.choose_architecture()
+print(net.name)
+config["Setup"]["Architecture"] = "ResBasenet"
+
+# data = config.__str__()
+# with open("config.toml", "w+") as f:
+#    f.write(data)
+# f.close()
+
+net = set_config.choose_architecture()
+print(net.name)
 
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
@@ -28,6 +39,7 @@ data = load_data.get_data()
 logging.info("Loaded Dataset")
 
 net = set_config.choose_architecture()
+
 
 if torch.cuda.device_count() > 1:
     net = nn.DistributedDataParallel(net)

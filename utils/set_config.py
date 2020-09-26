@@ -1,6 +1,7 @@
 import torch.optim as optim
 
 from model import *
+
 from utils.config import Config
 
 config = Config.get_instance()
