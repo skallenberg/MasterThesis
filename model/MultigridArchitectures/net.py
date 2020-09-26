@@ -9,17 +9,13 @@ from .utils import *
 
 from utils.config import Config
 
-config = Config.get_instance()
-
-data_name = config["Setup"]["Data"]
-alpha = config["Misc"]["CELU_alpha"]
-
 
 class MNANet(nn.Module):
     def __init__(
         self, name, block_type, layers, num_classes, residual=False, progressive=False,
     ):
         super().__init__()
+        self.config = Config().get_instance()
         self.name = name
         self.writer = ""
         self.num_classes = num_classes
@@ -41,12 +37,12 @@ class MNANet(nn.Module):
         self.inital_downsample_1 = interpolate(channels_in=64, scale=0.5)
         self.inital_downsample_2 = interpolate(channels_in=64, scale=0.25)
 
-        self.scale = config["Misc"]["FC_Scale"]
+        self.scale = self.config["Misc"]["FC_Scale"]
 
         self._init_modules()
 
     def _init_modules(self):
-        if config["Misc"]["UseCELU"]:
+        if self.config["Misc"]["UseCELU"]:
             nonlinearity = "leaky_relu"
         else:
             nonlinearity = "relu"
@@ -54,7 +50,7 @@ class MNANet(nn.Module):
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity=nonlinearity)
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
-                if config["Misc"]["GhostBatchNorm"]:
+                if self.config["Misc"]["GhostBatchNorm"]:
                     pass
                 else:
                     nn.init.constant_(m.weight, 1)

@@ -5,7 +5,7 @@ from utils.config import Config
 
 
 def _mna_netv2(name, block_type, layers, residual=False, progressive=False):
-    config = Config.get_instance()
+    config = Config().get_instance()
 
     if config["Setup"]["Data"] == "cifar100":
         num_classes = 100

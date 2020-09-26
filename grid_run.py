@@ -1,5 +1,9 @@
 import run
+import pandas as pd
+from utils.config import Config
+import logging
 
+logging.basicConfig(level=logging.INFO)
 
 model_list = [
     "BaseNetTest",
@@ -19,8 +23,6 @@ model_list = [
     "FASMGNetTest2",
     "MGNet34",
 ]
-epoch_list = [5, 50, 150, 200]
-dataset_list = ["cifar10", "cifar100"]
 MixedPrecision_Options = [True, False]
 MixUp_Options = [True, False]
 LabelSmoothing_Options = [True, False]
@@ -33,3 +35,55 @@ ConvolutionBias_Options = [True, False]
 TwoConvsPerBlock_Options = [True, False]
 PoolBeforeBN_Options = [True, False]
 
+for model in model_list:
+    Config().change_value("Setup", "Architecture", model)
+    logging.info("Using Model:\t%s" % (model))
+    for MixedPrec in MixedPrecision_Options:
+        Config().change_value("Trainer", "MixedPrecision", MixedPrec)
+        logging.info("Using MixedPrecision:\t%s" % (MixedPrec))
+
+        for MUp in MixUp_Options:
+            Config().change_value("Trainer", "MixUp", MUp)
+            logging.info("Using MixUp:\t%s" % (MUp))
+
+            for LS in LabelSmoothing_Options:
+                Config().change_value("Trainer", "LabelSmoothing", LS)
+                logging.info("Using LabelSmoothing:\t%s" % (LS))
+
+                for GH in GhostBatchNorm_Options:
+                    Config().change_value("Misc", "GhostBatchNorm", GH)
+                    logging.info("Using GhostBatchNorm:\t%s" % (GH))
+
+                    for C in CELU_Options:
+                        Config().change_value("Misc", "UseCELU", C)
+                        logging.info("Using CELU:\t%s" % (C))
+
+                        for W in WhiteningBlock_Options:
+                            Config().change_value("Misc", "WhiteningBlock", W)
+                            logging.info("Using WhiteningPatches:\t%s" % (W))
+
+                            for STP in StrideToPooling_Options:
+                                Config().change_value("Misc", "StrideToPooling", STP)
+                                logging.info("Using StrideToPooling:\t%s" % (STP))
+
+                                for D in Depthwise_Options:
+                                    Config().change_value("Misc", "Depthwise", D)
+                                    logging.info("Using DepthwiseConvolutions:\t%s" % (D))
+
+                                    for CB in ConvolutionBias_Options:
+                                        Config().change_value("Misc", "ConvolutionBias", CB)
+                                        logging.info("Using ConvolutionBias:\t%s" % (CB))
+
+                                        for TCB in TwoConvsPerBlock_Options:
+                                            Config().change_value("Misc", "TwoConvsPerBlock", TCB)
+                                            logging.info("Using TwoConvsPerBlock:\t%s" % (TCB))
+
+                                            for PBN in PoolBeforeBN_Options:
+                                                Config().change_value("Misc", "PoolBeforeBN", PBN)
+                                                logging.info(
+                                                    "Using PoolBeforeBatchNorm:\t%s" % (PBN)
+                                                )
+                                                try:
+                                                    run.train_model()
+                                                except:
+                                                    logging.info("Run Failed")

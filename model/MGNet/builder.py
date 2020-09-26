@@ -5,7 +5,7 @@ from utils.config import Config
 
 
 def _MGNet(name, layers, **kwargs):
-    config = Config.get_instance()
+    config = Config().get_instance()
 
     if config["Setup"]["Data"] == "cifar100":
         num_classes = 100
@@ -16,7 +16,7 @@ def _MGNet(name, layers, **kwargs):
 
 
 def _FASMGNet(name, layers, **kwargs):
-    config = Config.get_instance()
+    config = Config().get_instance()
 
     if config["Setup"]["Data"] == "cifar100":
         num_classes = 100
@@ -27,7 +27,7 @@ def _FASMGNet(name, layers, **kwargs):
 
 
 def _VMGNet(name, layers, **kwargs):
-    config = Config.get_instance()
+    config = Config().get_instance()
 
     if config["Setup"]["Data"] == "cifar100":
         num_classes = 100

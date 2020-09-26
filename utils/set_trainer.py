@@ -45,6 +45,7 @@ def dict_to_pair(data, **kwargs):
 
 
 def _set_metrics():
+    config = Config().get_instance()
     if config["Trainer"]["LabelSmoothing"]:
         criterion = CrossEntropyLoss(smooth_eps=0.2).to(device)
     else:

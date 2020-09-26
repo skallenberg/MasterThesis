@@ -7,10 +7,6 @@ from utils.config import Config
 
 from .utils import *
 
-config = Config.get_instance()
-
-alpha = config["Misc"]["CELU_alpha"]
-
 apply = lambda x, y: x(y)
 
 
@@ -19,6 +15,8 @@ class mgconv_progressive_block(nn.Module):
         self, block_type, channels_in, channels_out, stride=1, residual=False, nlayers=2,
     ):
         super().__init__()
+        self.config = Config().get_instance()
+
         self.stride = stride
         self.maxpool = nn.MaxPool2d(2, stride=1, padding=1)
         self.upsample = interpolate(scale=2)
@@ -36,17 +34,17 @@ class mgconv_progressive_block(nn.Module):
         parts = []
         for i in range(self.nlayers):
             parts.append(conv_3x3(ch_in // 4, ch_out // 4 * self.block_type.expansion))
-            if config["Misc"]["GhostBatchNorm"]:
+            if self.config["Misc"]["GhostBatchNorm"]:
                 parts.append(
                     GhostBatchNorm(
                         ch_in // 4 * self.block_type.expansion,
-                        config["DataLoader"]["BatchSize"] // 32,
+                        self.config["DataLoader"]["BatchSize"] // 32,
                     )
                 )
             else:
                 parts.append(nn.BatchNorm2d(ch_in // 4 * self.block_type.expansion))
-            if config["Misc"]["UseCELU"]:
-                parts.append(nn.CELU(alpha))
+            if self.config["Misc"]["UseCELU"]:
+                parts.append(nn.CELU(self.config["Misc"]["CELU_alpha"]))
             else:
                 parts.append(nn.ReLU(inplace=True))
             ch_in = ch_out * self.block_type.expansion
