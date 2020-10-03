@@ -5,7 +5,7 @@ import sys
 
 logging.basicConfig(level=logging.INFO)
 
-model_list = [
+"""model_list = [
     "BaseTest",
     "BaseNet34",
     "ResBaseTest",
@@ -25,7 +25,8 @@ model_list = [
     "MAN_Test",
     "MG16",
     "PMG16",
-]
+]"""
+model_list = ["BaseTest"]
 MixedPrecision_Options = [True, False]
 MixUp_Options = [True, False]
 LabelSmoothing_Options = [True, False]

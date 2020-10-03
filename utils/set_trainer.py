@@ -2,23 +2,28 @@ import logging
 import time
 from datetime import datetime
 
-import matplotlib.pyplot as plt
-
-from ignite.handlers import EarlyStopping, TerminateOnNan, Timer
 import ignite.metrics as metrics
+import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
-from torch.cuda.amp import GradScaler, autocast
-from ignite.contrib.handlers import ProgressBar, FastaiLRFinder
+from ignite.contrib.handlers import FastaiLRFinder
+from ignite.contrib.handlers import ProgressBar
 from ignite.contrib.handlers.param_scheduler import CosineAnnealingScheduler
 from ignite.contrib.handlers.tensorboard_logger import *
-from ignite.engine import Events, Engine
-from ignite.engine import create_supervised_evaluator, create_supervised_trainer
+from ignite.engine import Engine
+from ignite.engine import Events
+from ignite.engine import create_supervised_evaluator
+from ignite.engine import create_supervised_trainer
+from ignite.handlers import EarlyStopping
+from ignite.handlers import TerminateOnNan
+from ignite.handlers import Timer
+from torch.cuda.amp import GradScaler
+from torch.cuda.amp import autocast
 
 from utils import set_config
-from utils.ignite_metrics import ROC_AUC
 from utils.config import Config
 from utils.cross_entropy import CrossEntropyLoss
+from utils.ignite_metrics import ROC_AUC
 from utils.mixup import *
 
 if torch.cuda.is_available():
@@ -175,14 +180,14 @@ def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False)
     ProgressBar().attach(trainer, output_transform=lambda x: {"Loss": x})
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
-    timer = Timer(average=True)
-    timer.attach(trainer, step=Events.EPOCH_COMPLETED(every=50))
+    # timer = Timer(average=True)
+    # timer.attach(trainer, step=Events.EPOCH_COMPLETED)
 
-    @trainer.on(Events.EPOCH_COMPLETED(every=50))
+    @trainer.on(Events.EPOCH_COMPLETED(every=25))
     def log_training_results(engine):
         train_evaluator.run(dataset.trainloader)
         metrics = train_evaluator.state.metrics
-        logging.info("- Mean elapsed time for 1 epoch: {}".format(timer.value()))
+        # logging.info("- Mean elapsed time for 1 epoch: {}".format(timer.value()))
         logging.info(
             "Training Results - Epoch:\t{}\nAverage Accuracy:\t{:.2f}\nRunning Average Accuracy:\t{:.2f}\nAverage Loss:\t{:.2f}\nRunning Average Loss:\t{:.2f}\nAverage Precision:\t{:.2f}\nAverage Recall:\t{:.2f}\nAverage F1-Score:\t{:.2f}\nAverage ROC AUC:\t{:2f}".format(
                 trainer.state.epoch,
@@ -197,7 +202,7 @@ def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False)
             )
         )
 
-    @trainer.on(Events.EPOCH_COMPLETED(every=50))
+    @trainer.on(Events.EPOCH_COMPLETED(every=25))
     def log_validation_results(engine):
         test_evaluator.run(dataset.testloader)
         metrics = test_evaluator.state.metrics
