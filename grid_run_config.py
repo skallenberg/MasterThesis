@@ -5,27 +5,6 @@ import sys
 
 logging.basicConfig(level=logging.INFO)
 
-"""model_list = [
-    "BaseTest",
-    "BaseNet34",
-    "ResBaseTest",
-    "ResNet34",
-    "DenseTest",
-    "DenseNet34",
-    "FractalTest",
-    "FractalNet4",
-    "MRN_BaseTest",
-    "MRN_Net34",
-    "NiN_BaseTest",
-    "NiN_Net34",
-    "MGNetTest",
-    "FASMGNetTest1",
-    "FASMGNetTest2",
-    "MGNet34",
-    "MAN_Test",
-    "MG16",
-    "PMG16",
-]"""
 model_list = ["BaseTest"]
 MixedPrecision_Options = [True, False]
 MixUp_Options = [True, False]

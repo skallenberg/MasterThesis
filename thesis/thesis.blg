@@ -3,44 +3,54 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: thesis.aux
 The style file: plain.bst
 Database file #1: references.bib
-You've used 1 entry,
+You're missing a field name---line 22 of file references.bib
+ : @book{hebb-organization-of-behavior-1949,
+ :                                          ,
+I'm skipping whatever remains of this entry
+Warning--to sort, need author, editor, or key in hebb-organization-of-behavior-1949
+Warning--empty author and editor in hebb-organization-of-behavior-1949
+Warning--empty title in hebb-organization-of-behavior-1949
+Warning--empty publisher in hebb-organization-of-behavior-1949
+Warning--empty year in hebb-organization-of-behavior-1949
+You've used 5 entries,
             2118 wiz_defined-function locations,
-            504 strings with 4152 characters,
-and the built_in function-call counts, 311 in all, are:
-= -- 26
-> -- 18
-< -- 0
-+ -- 7
-- -- 6
-* -- 19
-:= -- 61
-add.period$ -- 4
-call.type$ -- 1
-change.case$ -- 5
+            521 strings with 4616 characters,
+and the built_in function-call counts, 1377 in all, are:
+= -- 123
+> -- 52
+< -- 1
++ -- 22
+- -- 16
+* -- 73
+:= -- 215
+add.period$ -- 14
+call.type$ -- 5
+change.case$ -- 18
 chr.to.int$ -- 0
-cite$ -- 1
-duplicate$ -- 12
-empty$ -- 23
-format.name$ -- 6
-if$ -- 61
+cite$ -- 10
+duplicate$ -- 77
+empty$ -- 124
+format.name$ -- 16
+if$ -- 302
 int.to.chr$ -- 0
-int.to.str$ -- 1
-missing$ -- 2
-newline$ -- 9
-num.names$ -- 2
-pop$ -- 9
+int.to.str$ -- 5
+missing$ -- 9
+newline$ -- 27
+num.names$ -- 8
+pop$ -- 48
 preamble$ -- 1
-purify$ -- 5
+purify$ -- 18
 quote$ -- 0
-skip$ -- 6
+skip$ -- 52
 stack$ -- 0
-substring$ -- 5
-swap$ -- 1
-text.length$ -- 0
+substring$ -- 40
+swap$ -- 19
+text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 2
-warning$ -- 0
-while$ -- 2
-width$ -- 2
-write$ -- 14
+type$ -- 10
+warning$ -- 5
+while$ -- 9
+width$ -- 6
+write$ -- 51
+(There was 1 error message)

@@ -1,9 +1,29 @@
 \begin{thebibliography}{1}
 
+\bibitem{hebb-organization-of-behavior-1949}
+
+
 \bibitem{Goodfellow-et-al-2016}
 Ian Goodfellow, Yoshua Bengio, and Aaron Courville.
 \newblock {\em Deep Learning}.
 \newblock MIT Press, 2016.
 \newblock \url{http://www.deeplearningbook.org}.
+
+\bibitem{10.5555/65669.104377}
+Warren~S. McCulloch and Walter Pitts.
+\newblock {\em A Logical Calculus of the Ideas Immanent in Nervous Activity},
+  page 15–27.
+\newblock MIT Press, Cambridge, MA, USA, 1988.
+
+\bibitem{minsky69perceptrons}
+Marvin Minsky and Seymour Papert.
+\newblock {\em Perceptrons: An Introduction to Computational Geometry}.
+\newblock MIT Press, Cambridge, MA, USA, 1969.
+
+\bibitem{werbos1975beyond}
+P.J. Werbos.
+\newblock {\em Beyond Regression: New Tools for Prediction and Analysis in the
+  Behavioral Sciences}.
+\newblock Harvard University, 1975.
 
 \end{thebibliography}
