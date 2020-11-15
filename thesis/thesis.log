@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.10.27)  10 NOV 2020 11:12
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.10.27)  15 NOV 2020 15:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1228,63 +1228,69 @@ l.116
 
 ] [2] [3]
 chapter 2.
-
-Underfull \hbox (badness 10000) in paragraph at lines 118--120
-
- []
-
 [4
 
 ]
-chapter 3.
-[5
+Underfull \hbox (badness 10000) in paragraph at lines 127--129
 
-]
-chapter 4.
+ []
+
+[5]
+chapter 3.
 [6
 
 ]
-chapter 5.
+chapter 4.
 [7
 
 ]
-chapter 6.
+chapter 5.
 [8
 
 ]
+chapter 6.
+[9
+
+]
 chapter 7.
-(./thesis.bbl [9
+(./thesis.bbl [10
 
 ]
 LaTeX Font Info:    Font shape `T1/phv/m/it' in size <12> not available
-(Font)              Font shape `T1/phv/m/sl' tried instead on input line 8.
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 24
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 7.
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 54
 .
  (c:/texlive/2020/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
-[10
+[11
 
-]) [11] (./thesis.aux)
+]
+Underfull \hbox (badness 1521) in paragraph at lines 146--150
+[]\T1/phv/m/n/12 Christian Szegedy, Sergey Ioffe, and Vin-cent Van-houcke.  Inc
+eption-v4,
+ []
+
+[12]) [13] (./thesis.aux)
 Package rerunfilecheck Info: File `thesis.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 23261 strings out of 479918
- 422764 string characters out of 5886688
+ 23296 strings out of 479918
+ 423580 string characters out of 5886688
  897917 words of memory out of 5000000
- 39307 multiletter control sequences out of 15000+600000
+ 39324 multiletter control sequences out of 15000+600000
  571697 words of font info for 78 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 106i,7n,111p,10601b,463s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 106i,7n,111p,10601b,459s stack positions out of 5000i,500n,10000p,200000b,80000s
 {c:/texlive/2020/texmf-dist/fonts/enc/dvips/base/8r.enc}<c:/texlive/2020/texm
 f-dist/fonts/type1/urw/courier/ucrr8a.pfb><c:/texlive/2020/texmf-dist/fonts/typ
 e1/urw/helvetic/uhvb8a.pfb><c:/texlive/2020/texmf-dist/fonts/type1/urw/helvetic
 /uhvr8a.pfb><c:/texlive/2020/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on thesis.pdf (15 pages, 61065 bytes).
+Output written on thesis.pdf (17 pages, 67778 bytes).
 PDF statistics:
- 225 PDF objects out of 1000 (max. 8388607)
- 201 compressed objects within 3 object streams
- 50 named destinations out of 1000 (max. 500000)
+ 268 PDF objects out of 1000 (max. 8388607)
+ 242 compressed objects within 3 object streams
+ 68 named destinations out of 1000 (max. 500000)
  149 words of extra memory for PDF output out of 10000 (max. 10000000)
 

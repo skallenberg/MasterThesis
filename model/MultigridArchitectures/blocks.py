@@ -125,7 +125,7 @@ class mgconv_progressive_block(nn.Module):
                 [self.downsample(x[1]), x[2]],
             ]
         cat_ = lambda x: torch.cat(x, 1)
-        grids = map(cat_, pairs)
+        grids = list(map(cat_, pairs))
         return grids
 
     def _forward_impl(self, x):
@@ -160,14 +160,14 @@ class mgconv_progressive_block(nn.Module):
             out = [self.downsample_list[1](x[1]), out]
             for idx in range(self.nlayers):
                 out = self._concat(out)
-                result = map(apply, self.mg_conv_path_1[idx], out)
+                result = list(map(apply, self.mg_conv_path_1[idx], out))
                 out = result
                 # out = [self.mg_conv_path_1[idx][i](out[i]) for i in range(2)]
 
             out = [self.downsample_list[0](x[0]), *out]
             for idx in range(self.nlayers):
                 out = self._concat(out)
-                out = map(apply, self.mg_conv_path_2[idx], out)
+                out = list(map(apply, self.mg_conv_path_2[idx], out))
                 # out = [self.mg_conv_path_2[idx][i](out[i]) for i in range(3)]
         return list(out)
 
@@ -261,7 +261,7 @@ class mgconv_base_block(nn.Module):
                 [self.downsample(x[1]), x[2]],
             ]
         cat_ = lambda x: torch.cat(x, 1)
-        grids = map(cat_, pairs)
+        grids = list(map(cat_, pairs))
         return grids
 
     def _forward_impl(self, x):

@@ -34,8 +34,8 @@ GhostBatchNorm = true
 UseCELU = true
 WhiteningBlock = true
 StrideToPooling = true
-Depthwise = false
+Depthwise = true
 ConvolutionBias = false
-TwoConvsPerBlock = true
+TwoConvsPerBlock = false
 PoolBeforeBN = true
 
