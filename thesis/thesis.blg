@@ -1,56 +1,46 @@
-This is BibTeX, Version 0.99d (TeX Live 2019/Debian)
+This is BibTeX, Version 0.99d (TeX Live 2020/W32TeX)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: thesis.aux
 The style file: plain.bst
 Database file #1: references.bib
-You're missing a field name---line 22 of file references.bib
- : @book{hebb-organization-of-behavior-1949,
- :                                          ,
-I'm skipping whatever remains of this entry
-Warning--to sort, need author, editor, or key in hebb-organization-of-behavior-1949
-Warning--empty author and editor in hebb-organization-of-behavior-1949
-Warning--empty title in hebb-organization-of-behavior-1949
-Warning--empty publisher in hebb-organization-of-behavior-1949
-Warning--empty year in hebb-organization-of-behavior-1949
-You've used 5 entries,
+You've used 16 entries,
             2118 wiz_defined-function locations,
-            521 strings with 4616 characters,
-and the built_in function-call counts, 1377 in all, are:
-= -- 123
-> -- 52
-< -- 1
-+ -- 22
-- -- 16
-* -- 73
-:= -- 215
-add.period$ -- 14
-call.type$ -- 5
-change.case$ -- 18
+            595 strings with 6859 characters,
+and the built_in function-call counts, 5690 in all, are:
+= -- 536
+> -- 310
+< -- 4
++ -- 122
+- -- 104
+* -- 344
+:= -- 915
+add.period$ -- 47
+call.type$ -- 16
+change.case$ -- 92
 chr.to.int$ -- 0
-cite$ -- 10
-duplicate$ -- 77
-empty$ -- 124
-format.name$ -- 16
-if$ -- 302
+cite$ -- 16
+duplicate$ -- 239
+empty$ -- 424
+format.name$ -- 104
+if$ -- 1234
 int.to.chr$ -- 0
-int.to.str$ -- 5
-missing$ -- 9
-newline$ -- 27
-num.names$ -- 8
-pop$ -- 48
+int.to.str$ -- 16
+missing$ -- 18
+newline$ -- 80
+num.names$ -- 34
+pop$ -- 140
 preamble$ -- 1
-purify$ -- 18
+purify$ -- 82
 quote$ -- 0
-skip$ -- 52
+skip$ -- 207
 stack$ -- 0
-substring$ -- 40
-swap$ -- 19
-text.length$ -- 1
+substring$ -- 239
+swap$ -- 83
+text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 10
-warning$ -- 5
-while$ -- 9
-width$ -- 6
-write$ -- 51
-(There was 1 error message)
+type$ -- 52
+warning$ -- 0
+while$ -- 42
+width$ -- 18
+write$ -- 167
