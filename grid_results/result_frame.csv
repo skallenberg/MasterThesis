@@ -1,0 +1,337 @@
+,model,metric,mode,epoch,run,value
+0,BaseNet34,Average Accuracy,train,25,0,0.73
+1,BaseNet34,Running Average Accuracy,train,25,0,0.73
+2,BaseNet34,Average Loss,train,25,0,0.9
+3,BaseNet34,Running Average Loss,train,25,0,0.9
+4,BaseNet34,Average Precision,train,25,0,0.77
+5,BaseNet34,Average Recall,train,25,0,0.73
+6,BaseNet34,Average F1-Score,train,25,0,0.73
+7,BaseNet34,Average ROC AUC,train,25,0,0.967657
+8,BaseNet34,Average Accuracy,val,25,0,0.76
+9,BaseNet34,Running Average Accuracy,val,25,0,0.77
+10,BaseNet34,Average Loss,val,25,0,0.83
+11,BaseNet34,Running Average Loss,val,25,0,0.81
+12,BaseNet34,Average Precision,val,25,0,0.78
+13,BaseNet34,Average Recall,val,25,0,0.76
+14,BaseNet34,Average F1-Score,val,25,0,0.75
+15,BaseNet34,Average ROC AUC,val,25,0,0.970843
+16,BaseNet34,Average Accuracy,train,50,0,0.82
+17,BaseNet34,Running Average Accuracy,train,50,0,0.82
+18,BaseNet34,Average Loss,train,50,0,0.67
+19,BaseNet34,Running Average Loss,train,50,0,0.66
+20,BaseNet34,Average Precision,train,50,0,0.82
+21,BaseNet34,Average Recall,train,50,0,0.82
+22,BaseNet34,Average F1-Score,train,50,0,0.82
+23,BaseNet34,Average ROC AUC,train,50,0,0.97957
+24,BaseNet34,Average Accuracy,val,50,0,0.82
+25,BaseNet34,Running Average Accuracy,val,50,0,0.82
+26,BaseNet34,Average Loss,val,50,0,0.62
+27,BaseNet34,Running Average Loss,val,50,0,0.62
+28,BaseNet34,Average Precision,val,50,0,0.83
+29,BaseNet34,Average Recall,val,50,0,0.82
+30,BaseNet34,Average F1-Score,val,50,0,0.82
+31,BaseNet34,Average ROC AUC,val,50,0,0.981053
+32,DenseNet34,Average Accuracy,train,25,0,0.73
+33,DenseNet34,Running Average Accuracy,train,25,0,0.73
+34,DenseNet34,Average Loss,train,25,0,0.87
+35,DenseNet34,Running Average Loss,train,25,0,0.87
+36,DenseNet34,Average Precision,train,25,0,0.73
+37,DenseNet34,Average Recall,train,25,0,0.73
+38,DenseNet34,Average F1-Score,train,25,0,0.73
+39,DenseNet34,Average ROC AUC,train,25,0,0.961772
+40,DenseNet34,Average Accuracy,val,25,0,0.75
+41,DenseNet34,Running Average Accuracy,val,25,0,0.75
+42,DenseNet34,Average Loss,val,25,0,0.79
+43,DenseNet34,Running Average Loss,val,25,0,0.79
+44,DenseNet34,Average Precision,val,25,0,0.75
+45,DenseNet34,Average Recall,val,25,0,0.75
+46,DenseNet34,Average F1-Score,val,25,0,0.74
+47,DenseNet34,Average ROC AUC,val,25,0,0.967364
+48,DenseNet34,Average Accuracy,train,50,0,0.78
+49,DenseNet34,Running Average Accuracy,train,50,0,0.78
+50,DenseNet34,Average Loss,train,50,0,0.68
+51,DenseNet34,Running Average Loss,train,50,0,0.68
+52,DenseNet34,Average Precision,train,50,0,0.79
+53,DenseNet34,Average Recall,train,50,0,0.78
+54,DenseNet34,Average F1-Score,train,50,0,0.78
+55,DenseNet34,Average ROC AUC,train,50,0,0.976587
+56,DenseNet34,Average Accuracy,val,50,0,0.79
+57,DenseNet34,Running Average Accuracy,val,50,0,0.79
+58,DenseNet34,Average Loss,val,50,0,0.64
+59,DenseNet34,Running Average Loss,val,50,0,0.62
+60,DenseNet34,Average Precision,val,50,0,0.8
+61,DenseNet34,Average Recall,val,50,0,0.79
+62,DenseNet34,Average F1-Score,val,50,0,0.79
+63,DenseNet34,Average ROC AUC,val,50,0,0.979097
+64,FractalNet4,Average Accuracy,train,25,0,0.72
+65,FractalNet4,Running Average Accuracy,train,25,0,0.71
+66,FractalNet4,Average Loss,train,25,0,0.87
+67,FractalNet4,Running Average Loss,train,25,0,0.9
+68,FractalNet4,Average Precision,train,25,0,0.73
+69,FractalNet4,Average Recall,train,25,0,0.72
+70,FractalNet4,Average F1-Score,train,25,0,0.72
+71,FractalNet4,Average ROC AUC,train,25,0,0.957653
+72,FractalNet4,Average Accuracy,val,25,0,0.74
+73,FractalNet4,Running Average Accuracy,val,25,0,0.77
+74,FractalNet4,Average Loss,val,25,0,0.82
+75,FractalNet4,Running Average Loss,val,25,0,0.72
+76,FractalNet4,Average Precision,val,25,0,0.76
+77,FractalNet4,Average Recall,val,25,0,0.74
+78,FractalNet4,Average F1-Score,val,25,0,0.74
+79,FractalNet4,Average ROC AUC,val,25,0,0.962246
+80,FractalNet4,Average Accuracy,train,50,0,0.82
+81,FractalNet4,Running Average Accuracy,train,50,0,0.82
+82,FractalNet4,Average Loss,train,50,0,0.57
+83,FractalNet4,Running Average Loss,train,50,0,0.58
+84,FractalNet4,Average Precision,train,50,0,0.83
+85,FractalNet4,Average Recall,train,50,0,0.82
+86,FractalNet4,Average F1-Score,train,50,0,0.82
+87,FractalNet4,Average ROC AUC,train,50,0,0.982831
+88,FractalNet4,Average Accuracy,val,50,0,0.82
+89,FractalNet4,Running Average Accuracy,val,50,0,0.81
+90,FractalNet4,Average Loss,val,50,0,0.57
+91,FractalNet4,Running Average Loss,val,50,0,0.58
+92,FractalNet4,Average Precision,val,50,0,0.83
+93,FractalNet4,Average Recall,val,50,0,0.82
+94,FractalNet4,Average F1-Score,val,50,0,0.82
+95,FractalNet4,Average ROC AUC,val,50,0,0.982513
+96,NiN_Net34,Average Accuracy,train,25,0,0.73
+97,NiN_Net34,Running Average Accuracy,train,25,0,0.72
+98,NiN_Net34,Average Loss,train,25,0,0.89
+99,NiN_Net34,Running Average Loss,train,25,0,0.9
+100,NiN_Net34,Average Precision,train,25,0,0.73
+101,NiN_Net34,Average Recall,train,25,0,0.73
+102,NiN_Net34,Average F1-Score,train,25,0,0.73
+103,NiN_Net34,Average ROC AUC,train,25,0,0.961441
+104,NiN_Net34,Average Accuracy,val,25,0,0.73
+105,NiN_Net34,Running Average Accuracy,val,25,0,0.75
+106,NiN_Net34,Average Loss,val,25,0,0.85
+107,NiN_Net34,Running Average Loss,val,25,0,0.84
+108,NiN_Net34,Average Precision,val,25,0,0.74
+109,NiN_Net34,Average Recall,val,25,0,0.73
+110,NiN_Net34,Average F1-Score,val,25,0,0.73
+111,NiN_Net34,Average ROC AUC,val,25,0,0.9641
+112,NiN_Net34,Average Accuracy,train,50,0,0.69
+113,NiN_Net34,Running Average Accuracy,train,50,0,0.68
+114,NiN_Net34,Average Loss,train,50,0,0.93
+115,NiN_Net34,Running Average Loss,train,50,0,0.93
+116,NiN_Net34,Average Precision,train,50,0,0.7
+117,NiN_Net34,Average Recall,train,50,0,0.69
+118,NiN_Net34,Average F1-Score,train,50,0,0.68
+119,NiN_Net34,Average ROC AUC,train,50,0,0.953595
+120,NiN_Net34,Average Accuracy,val,50,0,0.71
+121,NiN_Net34,Running Average Accuracy,val,50,0,0.71
+122,NiN_Net34,Average Loss,val,50,0,0.85
+123,NiN_Net34,Running Average Loss,val,50,0,0.85
+124,NiN_Net34,Average Precision,val,50,0,0.72
+125,NiN_Net34,Average Recall,val,50,0,0.71
+126,NiN_Net34,Average F1-Score,val,50,0,0.71
+127,NiN_Net34,Average ROC AUC,val,50,0,0.960773
+128,MG16,Average Accuracy,train,25,0,0.81
+129,MG16,Running Average Accuracy,train,25,0,0.81
+130,MG16,Average Loss,train,25,0,0.73
+131,MG16,Running Average Loss,train,25,0,0.72
+132,MG16,Average Precision,train,25,0,0.81
+133,MG16,Average Recall,train,25,0,0.81
+134,MG16,Average F1-Score,train,25,0,0.81
+135,MG16,Average ROC AUC,train,25,0,0.978295
+136,MG16,Average Accuracy,val,25,0,0.81
+137,MG16,Running Average Accuracy,val,25,0,0.81
+138,MG16,Average Loss,val,25,0,0.69
+139,MG16,Running Average Loss,val,25,0,0.69
+140,MG16,Average Precision,val,25,0,0.82
+141,MG16,Average Recall,val,25,0,0.81
+142,MG16,Average F1-Score,val,25,0,0.81
+143,MG16,Average ROC AUC,val,25,0,0.978572
+144,MG16,Average Accuracy,train,50,0,0.76
+145,MG16,Running Average Accuracy,train,50,0,0.76
+146,MG16,Average Loss,train,50,0,0.82
+147,MG16,Running Average Loss,train,50,0,0.82
+148,MG16,Average Precision,train,50,0,0.77
+149,MG16,Average Recall,train,50,0,0.76
+150,MG16,Average F1-Score,train,50,0,0.76
+151,MG16,Average ROC AUC,train,50,0,0.970295
+152,MG16,Average Accuracy,val,50,0,0.77
+153,MG16,Running Average Accuracy,val,50,0,0.78
+154,MG16,Average Loss,val,50,0,0.76
+155,MG16,Running Average Loss,val,50,0,0.75
+156,MG16,Average Precision,val,50,0,0.78
+157,MG16,Average Recall,val,50,0,0.77
+158,MG16,Average F1-Score,val,50,0,0.77
+159,MG16,Average ROC AUC,val,50,0,0.973203
+160,BaseNet34,Average Accuracy,train,25,1,0.57
+161,BaseNet34,Running Average Accuracy,train,25,1,0.57
+162,BaseNet34,Average Loss,train,25,1,1.28
+163,BaseNet34,Running Average Loss,train,25,1,1.28
+164,BaseNet34,Average Precision,train,25,1,0.56
+165,BaseNet34,Average Recall,train,25,1,0.57
+166,BaseNet34,Average F1-Score,train,25,1,0.56
+167,BaseNet34,Average ROC AUC,train,25,1,0.912802
+168,BaseNet34,Average Accuracy,val,25,1,0.6
+169,BaseNet34,Running Average Accuracy,val,25,1,0.59
+170,BaseNet34,Average Loss,val,25,1,1.18
+171,BaseNet34,Running Average Loss,val,25,1,1.2
+172,BaseNet34,Average Precision,val,25,1,0.6
+173,BaseNet34,Average Recall,val,25,1,0.6
+174,BaseNet34,Average F1-Score,val,25,1,0.59
+175,BaseNet34,Average ROC AUC,val,25,1,0.926711
+176,DenseNet34,Average Accuracy,train,25,1,0.67
+177,DenseNet34,Running Average Accuracy,train,25,1,0.67
+178,DenseNet34,Average Loss,train,25,1,0.97
+179,DenseNet34,Running Average Loss,train,25,1,0.96
+180,DenseNet34,Average Precision,train,25,1,0.68
+181,DenseNet34,Average Recall,train,25,1,0.67
+182,DenseNet34,Average F1-Score,train,25,1,0.67
+183,DenseNet34,Average ROC AUC,train,25,1,0.953309
+184,DenseNet34,Average Accuracy,val,25,1,0.71
+185,DenseNet34,Running Average Accuracy,val,25,1,0.7
+186,DenseNet34,Average Loss,val,25,1,0.86
+187,DenseNet34,Running Average Loss,val,25,1,0.87
+188,DenseNet34,Average Precision,val,25,1,0.72
+189,DenseNet34,Average Recall,val,25,1,0.71
+190,DenseNet34,Average F1-Score,val,25,1,0.7
+191,DenseNet34,Average ROC AUC,val,25,1,0.961069
+192,FractalNet4,Average Accuracy,train,25,1,0.61
+193,FractalNet4,Running Average Accuracy,train,25,1,0.6
+194,FractalNet4,Average Loss,train,25,1,1.15
+195,FractalNet4,Running Average Loss,train,25,1,1.15
+196,FractalNet4,Average Precision,train,25,1,0.61
+197,FractalNet4,Average Recall,train,25,1,0.61
+198,FractalNet4,Average F1-Score,train,25,1,0.6
+199,FractalNet4,Average ROC AUC,train,25,1,0.926159
+200,FractalNet4,Average Accuracy,val,25,1,0.64
+201,FractalNet4,Running Average Accuracy,val,25,1,0.65
+202,FractalNet4,Average Loss,val,25,1,1.05
+203,FractalNet4,Running Average Loss,val,25,1,1.04
+204,FractalNet4,Average Precision,val,25,1,0.64
+205,FractalNet4,Average Recall,val,25,1,0.64
+206,FractalNet4,Average F1-Score,val,25,1,0.63
+207,FractalNet4,Average ROC AUC,val,25,1,0.939547
+208,NiN_Net34,Average Accuracy,train,25,1,0.1
+209,NiN_Net34,Running Average Accuracy,train,25,1,0.1
+210,NiN_Net34,Average Loss,train,25,1,2.3
+211,NiN_Net34,Running Average Loss,train,25,1,2.3
+212,NiN_Net34,Average Precision,train,25,1,0.01
+213,NiN_Net34,Average Recall,train,25,1,0.1
+214,NiN_Net34,Average F1-Score,train,25,1,0.02
+215,NiN_Net34,Average ROC AUC,train,25,1,0.5
+216,NiN_Net34,Average Accuracy,val,25,1,0.1
+217,NiN_Net34,Running Average Accuracy,val,25,1,0.1
+218,NiN_Net34,Average Loss,val,25,1,2.3
+219,NiN_Net34,Running Average Loss,val,25,1,2.3
+220,NiN_Net34,Average Precision,val,25,1,0.01
+221,NiN_Net34,Average Recall,val,25,1,0.1
+222,NiN_Net34,Average F1-Score,val,25,1,0.02
+223,NiN_Net34,Average ROC AUC,val,25,1,0.5
+224,NiN_Net34,Average Accuracy,train,50,1,0.1
+225,NiN_Net34,Running Average Accuracy,train,50,1,0.1
+226,NiN_Net34,Average Loss,train,50,1,2.3
+227,NiN_Net34,Running Average Loss,train,50,1,2.3
+228,NiN_Net34,Average Precision,train,50,1,0.01
+229,NiN_Net34,Average Recall,train,50,1,0.1
+230,NiN_Net34,Average F1-Score,train,50,1,0.02
+231,NiN_Net34,Average ROC AUC,train,50,1,0.5
+232,NiN_Net34,Average Accuracy,val,50,1,0.1
+233,NiN_Net34,Running Average Accuracy,val,50,1,0.1
+234,NiN_Net34,Average Loss,val,50,1,2.3
+235,NiN_Net34,Running Average Loss,val,50,1,2.3
+236,NiN_Net34,Average Precision,val,50,1,0.01
+237,NiN_Net34,Average Recall,val,50,1,0.1
+238,NiN_Net34,Average F1-Score,val,50,1,0.02
+239,NiN_Net34,Average ROC AUC,val,50,1,0.5
+240,MG16,Average Accuracy,train,25,1,0.8
+241,MG16,Running Average Accuracy,train,25,1,0.79
+242,MG16,Average Loss,train,25,1,0.68
+243,MG16,Running Average Loss,train,25,1,0.67
+244,MG16,Average Precision,train,25,1,0.81
+245,MG16,Average Recall,train,25,1,0.8
+246,MG16,Average F1-Score,train,25,1,0.79
+247,MG16,Average ROC AUC,train,25,1,0.981838
+248,MG16,Average Accuracy,val,25,1,0.79
+249,MG16,Running Average Accuracy,val,25,1,0.79
+250,MG16,Average Loss,val,25,1,0.69
+251,MG16,Running Average Loss,val,25,1,0.68
+252,MG16,Average Precision,val,25,1,0.8
+253,MG16,Average Recall,val,25,1,0.79
+254,MG16,Average F1-Score,val,25,1,0.79
+255,MG16,Average ROC AUC,val,25,1,0.98029
+256,MG16,Average Accuracy,train,50,1,0.87
+257,MG16,Running Average Accuracy,train,50,1,0.87
+258,MG16,Average Loss,train,50,1,0.48
+259,MG16,Running Average Loss,train,50,1,0.48
+260,MG16,Average Precision,train,50,1,0.88
+261,MG16,Average Recall,train,50,1,0.87
+262,MG16,Average F1-Score,train,50,1,0.87
+263,MG16,Average ROC AUC,train,50,1,0.990805
+264,MG16,Average Accuracy,val,50,1,0.87
+265,MG16,Running Average Accuracy,val,50,1,0.87
+266,MG16,Average Loss,val,50,1,0.47
+267,MG16,Running Average Loss,val,50,1,0.45
+268,MG16,Average Precision,val,50,1,0.87
+269,MG16,Average Recall,val,50,1,0.87
+270,MG16,Average F1-Score,val,50,1,0.87
+271,MG16,Average ROC AUC,val,50,1,0.989606
+272,PMG16,Average Accuracy,train,25,1,0.81
+273,PMG16,Running Average Accuracy,train,25,1,0.81
+274,PMG16,Average Loss,train,25,1,0.64
+275,PMG16,Running Average Loss,train,25,1,0.63
+276,PMG16,Average Precision,train,25,1,0.82
+277,PMG16,Average Recall,train,25,1,0.81
+278,PMG16,Average F1-Score,train,25,1,0.81
+279,PMG16,Average ROC AUC,train,25,1,0.982587
+280,PMG16,Average Accuracy,val,25,1,0.81
+281,PMG16,Running Average Accuracy,val,25,1,0.82
+282,PMG16,Average Loss,val,25,1,0.63
+283,PMG16,Running Average Loss,val,25,1,0.62
+284,PMG16,Average Precision,val,25,1,0.82
+285,PMG16,Average Recall,val,25,1,0.81
+286,PMG16,Average F1-Score,val,25,1,0.81
+287,PMG16,Average ROC AUC,val,25,1,0.9816
+288,PMG16,Average Accuracy,train,50,1,0.81
+289,PMG16,Running Average Accuracy,train,50,1,0.81
+290,PMG16,Average Loss,train,50,1,0.58
+291,PMG16,Running Average Loss,train,50,1,0.58
+292,PMG16,Average Precision,train,50,1,0.82
+293,PMG16,Average Recall,train,50,1,0.81
+294,PMG16,Average F1-Score,train,50,1,0.81
+295,PMG16,Average ROC AUC,train,50,1,0.982695
+296,PMG16,Average Accuracy,val,50,1,0.82
+297,PMG16,Running Average Accuracy,val,50,1,0.84
+298,PMG16,Average Loss,val,50,1,0.54
+299,PMG16,Running Average Loss,val,50,1,0.52
+300,PMG16,Average Precision,val,50,1,0.83
+301,PMG16,Average Recall,val,50,1,0.82
+302,PMG16,Average F1-Score,val,50,1,0.82
+303,PMG16,Average ROC AUC,val,50,1,0.983715
+304,NiN_Net34,Average Accuracy,train,25,2,0.1
+305,NiN_Net34,Running Average Accuracy,train,25,2,0.1
+306,NiN_Net34,Average Loss,train,25,2,2.3
+307,NiN_Net34,Running Average Loss,train,25,2,2.3
+308,NiN_Net34,Average Precision,train,25,2,0.01
+309,NiN_Net34,Average Recall,train,25,2,0.1
+310,NiN_Net34,Average F1-Score,train,25,2,0.02
+311,NiN_Net34,Average ROC AUC,train,25,2,0.5
+312,NiN_Net34,Average Accuracy,val,25,2,0.1
+313,NiN_Net34,Running Average Accuracy,val,25,2,0.11
+314,NiN_Net34,Average Loss,val,25,2,2.3
+315,NiN_Net34,Running Average Loss,val,25,2,2.3
+316,NiN_Net34,Average Precision,val,25,2,0.01
+317,NiN_Net34,Average Recall,val,25,2,0.1
+318,NiN_Net34,Average F1-Score,val,25,2,0.02
+319,NiN_Net34,Average ROC AUC,val,25,2,0.5
+320,NiN_Net34,Average Accuracy,train,50,2,0.1
+321,NiN_Net34,Running Average Accuracy,train,50,2,0.1
+322,NiN_Net34,Average Loss,train,50,2,2.3
+323,NiN_Net34,Running Average Loss,train,50,2,2.3
+324,NiN_Net34,Average Precision,train,50,2,0.01
+325,NiN_Net34,Average Recall,train,50,2,0.1
+326,NiN_Net34,Average F1-Score,train,50,2,0.02
+327,NiN_Net34,Average ROC AUC,train,50,2,0.5
+328,NiN_Net34,Average Accuracy,val,50,2,0.1
+329,NiN_Net34,Running Average Accuracy,val,50,2,0.11
+330,NiN_Net34,Average Loss,val,50,2,2.3
+331,NiN_Net34,Running Average Loss,val,50,2,2.3
+332,NiN_Net34,Average Precision,val,50,2,0.01
+333,NiN_Net34,Average Recall,val,50,2,0.1
+334,NiN_Net34,Average F1-Score,val,50,2,0.02
+335,NiN_Net34,Average ROC AUC,val,50,2,0.5

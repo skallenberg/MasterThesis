@@ -1,7 +1,7 @@
 [Setup]
 Data = "cifar10"
 Architecture = "BaseTest"
-Epochs = 50
+Epochs = 100
 
 [Trainer]
 MixedPrecision = true
@@ -14,8 +14,8 @@ LRFinderCycles = 5
 LRFinderPlot = false
 
 [Optimizer]
-Type = "SGD"
-LearnRate = 0.01
+Type = "SDG"
+LearnRate = 0.001
 Momentum = 0.9
 WeightDecay = 5e-4
 SGDNesterov = true
