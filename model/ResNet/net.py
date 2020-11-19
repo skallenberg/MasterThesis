@@ -40,8 +40,8 @@ class ResNet(BaseNet):
         downsample = None
 
         if stride != 1 or self.channels_in != channels * self.block_type.expansion:
-            if config["Misc"]["GhostBatchNorm"]:
-                bn = GhostBatchNorm(self.channels_in, config["DataLoader"]["BatchSize"] // 32)
+            if self.config["Misc"]["GhostBatchNorm"]:
+                bn = GhostBatchNorm(self.channels_in, self.config["DataLoader"]["BatchSize"] // 32)
             else:
                 bn = nn.BatchNorm2d(self.channels_in)
             downsample = nn.Sequential(

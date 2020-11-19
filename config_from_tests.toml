@@ -14,7 +14,7 @@ LRFinderCycles = 5
 LRFinderPlot = false
 
 [Optimizer]
-Type = "SDG"
+Type = "SGD"
 LearnRate = 0.001
 Momentum = 0.9
 WeightDecay = 5e-4

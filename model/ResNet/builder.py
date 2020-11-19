@@ -27,4 +27,4 @@ def ResNet34():
 
 
 def ResNet50():
-    return _resnet("ResNet50", residual_bottleneck_block, [3, 4, 6, 3])
+    return _resnet("ResNet50", residual_bottleneck_block, [3, 4, 6, 3],sd="prog")

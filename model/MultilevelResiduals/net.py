@@ -12,8 +12,8 @@ class MRNNet(ResNet):
         super().__init__(
             name, block_type, layers, num_classes,
         )
-        if config["Misc"]["GhostBatchNorm"]:
-            bn0 = GhostBatchNorm(64, config["DataLoader"]["BatchSize"] // 32)
+        if self.config["Misc"]["GhostBatchNorm"]:
+            bn0 = GhostBatchNorm(64, self.config["DataLoader"]["BatchSize"] // 32)
         else:
             bn0 = nn.BatchNorm2d(64)
         self.downsample_0 = nn.Sequential(
@@ -32,8 +32,8 @@ class MRNNet(ResNet):
 
         channels_in = 64
 
-        if config["Misc"]["GhostBatchNorm"]:
-            bn = GhostBatchNorm(channels_in, config["DataLoader"]["BatchSize"] // 32)
+        if self.config["Misc"]["GhostBatchNorm"]:
+            bn = GhostBatchNorm(channels_in, self.config["DataLoader"]["BatchSize"] // 32)
         else:
             bn = nn.BatchNorm2d(channels_in)
         self.downsample_layers.append(
@@ -43,8 +43,8 @@ class MRNNet(ResNet):
         channels_in = 64 * self.block_type.expansion
         for i in range(1, len(layers)):
             channels = 64 * (2 ** i)
-            if config["Misc"]["GhostBatchNorm"]:
-                bn = GhostBatchNorm(channels_in, config["DataLoader"]["BatchSize"] // 32)
+            if self.config["Misc"]["GhostBatchNorm"]:
+                bn = GhostBatchNorm(channels_in, self.config["DataLoader"]["BatchSize"] // 32)
             else:
                 bn = nn.BatchNorm2d(channels_in)
             self.downsample_layers.append(

@@ -20,8 +20,16 @@ class mapping_block(nn.Module):
         self.conv1 = conv_3x3(channels_in, channels_in)
         self.batch_norm = batch_norm
         if self.batch_norm:
-            self.bn0 = nn.BatchNorm2d(channels_in)
-            self.bn1 = nn.BatchNorm2d(channels_in)
+            if self.config["Misc"]["GhostBatchNorm"]:
+                self.bn0 = GhostBatchNorm(
+                    channels_in, self.config["DataLoader"]["BatchSize"] // 32
+                )
+                self.bn1 = GhostBatchNorm(
+                    channels_in, self.config["DataLoader"]["BatchSize"] // 32
+                )
+            else:
+                self.bn0 = nn.BatchNorm2d(channels_in)
+                self.bn1 = nn.BatchNorm2d(channels_in)
 
     def _forward_impl(self, x):
         if self.batch_norm:

@@ -44,3 +44,6 @@ def train_model(visualize_graph=False):
     logging.info("Finished Run")
 
     logging.info("Run successfull")
+
+if __name__ == "__main__":
+    train_model()
