@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.10.27)  15 NOV 2020 15:52
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.10.27)  8 DEC 2020 19:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1235,35 +1235,127 @@ Underfull \hbox (badness 10000) in paragraph at lines 127--129
 
  []
 
-[5]
-chapter 3.
-[6
 
-]
-chapter 4.
+LaTeX Warning: Citation `DBLP:journals/corr/RonnebergerFB15' on page 5 undefine
+d on input line 131.
+
+
+LaTeX Warning: Citation `DBLP:journals/corr/abs-1710-10121' on page 5 undefined
+ on input line 133.
+
+
+LaTeX Warning: Citation `DBLP:journals/corr/abs-1901-10415' on page 5 undefined
+ on input line 133.
+
+[5] [6]
+chapter 3.
 [7
 
 ]
-chapter 5.
+chapter 4.
+
+Underfull \hbox (badness 10000) in paragraph at lines 146--149
+
+ []
+
+LaTeX Font Info:    Font shape `T1/phv/m/it' in size <12> not available
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 149.
+
+Underfull \hbox (badness 10000) in paragraph at lines 155--156
+
+ []
+
 [8
 
 ]
+Underfull \hbox (badness 10000) in paragraph at lines 174--177
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 183--184
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 190--191
+
+ []
+
+[9]
+Underfull \hbox (badness 10000) in paragraph at lines 209--212
+
+ []
+
+LaTeX Font Info:    Font shape `T1/phv/m/it' in size <8> not available
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 225.
+LaTeX Font Info:    Font shape `T1/phv/m/it' in size <6> not available
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 225.
+[10]
+Underfull \hbox (badness 10000) in paragraph at lines 246--247
+
+ []
+
+LaTeX Font Info:    Trying to load font information for TS1+phv on input line 2
+54.
+(c:/texlive/2020/texmf-dist/tex/latex/psnfss/ts1phv.fd
+File: ts1phv.fd 2020/03/25 scalable font definitions for TS1/phv.
+)
+LaTeX Font Info:    Font shape `TS1/phv/m/it' in size <12> not available
+(Font)              Font shape `TS1/phv/m/sl' tried instead on input line 254.
+ [11]
+Underfull \hbox (badness 10000) in paragraph at lines 276--277
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 278--280
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 281--282
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 283--284
+
+ []
+
+[12]
+Underfull \hbox (badness 10000) in paragraph at lines 312--313
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 314--317
+
+ []
+
+[13]
+
+LaTeX Warning: Citation `MaxPool' on page 14 undefined on input line 325.
+
+[14]
+chapter 5.
+[15
+
+]
 chapter 6.
-[9
+[16
 
 ]
 chapter 7.
-(./thesis.bbl [10
+(./thesis.bbl [17
 
 ]
-LaTeX Font Info:    Font shape `T1/phv/m/it' in size <12> not available
-(Font)              Font shape `T1/phv/m/sl' tried instead on input line 7.
 LaTeX Font Info:    Trying to load font information for T1+pcr on input line 54
 .
  (c:/texlive/2020/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
-[11
+[18
 
 ]
 Underfull \hbox (badness 1521) in paragraph at lines 146--150
@@ -1271,26 +1363,38 @@ Underfull \hbox (badness 1521) in paragraph at lines 146--150
 eption-v4,
  []
 
-[12]) [13] (./thesis.aux)
+[19]) [20] (./thesis.aux)
 Package rerunfilecheck Info: File `thesis.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
+
+
+LaTeX Warning: There were undefined references.
+
  ) 
 Here is how much of TeX's memory you used:
- 23296 strings out of 479918
- 423580 string characters out of 5886688
+ 23401 strings out of 479918
+ 425354 string characters out of 5886688
  897917 words of memory out of 5000000
- 39324 multiletter control sequences out of 15000+600000
- 571697 words of font info for 78 fonts, out of 8000000 for 9000
+ 39380 multiletter control sequences out of 15000+600000
+ 575646 words of font info for 81 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 106i,7n,111p,10601b,459s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 106i,15n,111p,10601b,488s stack positions out of 5000i,500n,10000p,200000b,80000s
 {c:/texlive/2020/texmf-dist/fonts/enc/dvips/base/8r.enc}<c:/texlive/2020/texm
-f-dist/fonts/type1/urw/courier/ucrr8a.pfb><c:/texlive/2020/texmf-dist/fonts/typ
-e1/urw/helvetic/uhvb8a.pfb><c:/texlive/2020/texmf-dist/fonts/type1/urw/helvetic
-/uhvr8a.pfb><c:/texlive/2020/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on thesis.pdf (17 pages, 67778 bytes).
+f-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><c:/texlive/2020/texmf-dist/fo
+nts/type1/public/hfbright/hfbr10.pfb><c:/texlive/2020/texmf-dist/fonts/type1/pu
+blic/hfbright/hfbr8.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/hfbright
+/hfbrbs10.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/hfbright/hfbrmb10.
+pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/hfbright/hfbrmi10.pfb><c:/te
+xlive/2020/texmf-dist/fonts/type1/public/hfbright/hfbrmi8.pfb><c:/texlive/2020/
+texmf-dist/fonts/type1/public/hfbright/hfbrsy10.pfb><c:/texlive/2020/texmf-dist
+/fonts/type1/public/hfbright/hfbrsy8.pfb><c:/texlive/2020/texmf-dist/fonts/type
+1/urw/courier/ucrr8a.pfb><c:/texlive/2020/texmf-dist/fonts/type1/urw/helvetic/u
+hvb8a.pfb><c:/texlive/2020/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb><c:/t
+exlive/2020/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
+Output written on thesis.pdf (24 pages, 178475 bytes).
 PDF statistics:
- 268 PDF objects out of 1000 (max. 8388607)
- 242 compressed objects within 3 object streams
- 68 named destinations out of 1000 (max. 500000)
- 149 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 388 PDF objects out of 1000 (max. 8388607)
+ 345 compressed objects within 4 object streams
+ 113 named destinations out of 1000 (max. 500000)
+ 157 words of extra memory for PDF output out of 10000 (max. 10000000)
 

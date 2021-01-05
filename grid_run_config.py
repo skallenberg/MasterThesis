@@ -6,12 +6,12 @@ import sys
 logging.basicConfig(level=logging.INFO)
 
 model_list = [
-    "ResNet34",
-    "ResNet50",
-    "DenseNet34",
-    "DenseNet121",
-    "FractalNet4",
-    "MRN_Net34",
+#    "ResNet34",
+#    "ResNet50",
+#    "DenseNet34",
+#    "DenseNet121",
+#    "FractalNet4",
+#    "MRN_Net34",
     "FASMGNetTest1",
     "FASMGNetTest2",
     "MGNet34",

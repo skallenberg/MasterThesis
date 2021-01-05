@@ -6,3 +6,7 @@ roadmap.txt
 venv/
 .vscode/
 run_results/
+Bachelor/
+grid_results/
+grid_full_2.txt
+result_frame_2.csv
