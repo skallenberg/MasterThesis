@@ -43,34 +43,97 @@ def MGNetTest(**kwargs):
 
 def FASMGNetTest1(**kwargs):
     kwargs["mode"] = 1
-    kwargs["smoothing_steps"] = 4
+    kwargs["smoothing_steps"] = 2
     kwargs["batch_norm"] = True
-    return _FASMGNet("FASMGNetTest", 4, **kwargs)
+    return _FASMGNet("FASMGNetTest1", 3, **kwargs)
 
+def FASMGNetTwoGrid_1(**kwargs):
+    kwargs["mode"] = 1
+    kwargs["smoothing_steps"] = 2
+    kwargs["batch_norm"] = False
+    return _FASMGNet("FASMGNetTwoGrid_1", 2, **kwargs)
 
-def FASMGNetTest2(**kwargs):
+def FASMGNet9_1(**kwargs):
+    kwargs["mode"] = 1
+    kwargs["smoothing_steps"] = 2
+    kwargs["batch_norm"] = False
+    return _FASMGNet("FASMGNet9_1", 3, **kwargs)
+
+def FASMGNet12_1(**kwargs):
+    kwargs["mode"] = 1
+    kwargs["smoothing_steps"] = 2
+    kwargs["batch_norm"] = False
+    return _FASMGNet("FASMGNet12_1", 4, **kwargs)
+
+def FASMGNet18_1(**kwargs):
+    kwargs["mode"] = 1
+    kwargs["smoothing_steps"] = 2
+    kwargs["batch_norm"] = False
+    return _FASMGNet("FASMGNet18_1", 5, **kwargs)
+
+def FASMGNet34_1(**kwargs):
+    kwargs["mode"] = 1
+    kwargs["smoothing_steps"] = 4
+    kwargs["batch_norm"] = False
+    return _FASMGNet("FASMGNet34_1", 5, **kwargs)
+
+def FASMGNetTwoGrid_2(**kwargs):
+    kwargs["mode"] = 2
+    kwargs["smoothing_steps"] = 2
+    kwargs["batch_norm"] = False
+    return _FASMGNet("FASMGNetTwoGrid_2", 2, **kwargs)
+
+def FASMGNet9_2(**kwargs):
+    kwargs["mode"] = 2
+    kwargs["smoothing_steps"] = 2
+    kwargs["batch_norm"] = False
+    return _FASMGNet("FASMGNet9_2", 3, **kwargs)
+
+def FASMGNet12_2(**kwargs):
+    kwargs["mode"] = 1
+    kwargs["smoothing_steps"] = 2
+    kwargs["batch_norm"] = False
+    return _FASMGNet("FASMGNet12_2", 4, **kwargs)
+
+def FASMGNet18_2(**kwargs):
+    kwargs["mode"] = 2
+    kwargs["smoothing_steps"] = 2
+    kwargs["batch_norm"] = False
+    return _FASMGNet("FASMGNet18_2", 5, **kwargs)
+
+def FASMGNet34_2(**kwargs):
     kwargs["mode"] = 2
     kwargs["smoothing_steps"] = 4
-    kwargs["batch_norm"] = True
-    return _FASMGNet("FASMGNetTest", 4, **kwargs)
-
+    kwargs["batch_norm"] = False
+    return _FASMGNet("FASMGNet34_2", 5, **kwargs)
 
 def FASMGNetTest3(**kwargs):
     kwargs["mode"] = 3
-    kwargs["smoothing_steps"] = 1
-    return _FASMGNet("FASMGNetTest", 4, **kwargs)
+    kwargs["smoothing_steps"] = 2
+    return _FASMGNet("FASMGNetTest3", 3, **kwargs)
 
 
 def VMGNetTest(**kwargs):
     kwargs["smoothing_steps"] = 2
     return _VMGNet("VMGNetTest", 3, **kwargs)
 
+def MGNetTwoGrid(**kwargs):
+    kwargs["smoothing_steps"] = 2
+    return _MGNet("MGNetTwoGrid", 2, **kwargs)
+
+def MGNet9(**kwargs):
+    kwargs["smoothing_steps"] = 2
+    return _MGNet("MGNet9", 3, **kwargs)
+
+def MGNet12(**kwargs):
+    kwargs["smoothing_steps"] = 2
+    return _MGNet("MGNet12", 4, **kwargs)
+
+def MGNet18(**kwargs):
+    kwargs["smoothing_steps"] = 2
+    return _MGNet("MGNet18", 5, **kwargs)
+
 
 def MGNet34(**kwargs):
     kwargs["smoothing_steps"] = 4
-    return _MGNet("MGNetNet34", 4, **kwargs)
-
-
-def MGNet50(**kwargs):
-    kwargs["smoothing_steps"] = 4
-    return _MGNet("MGNetTest", 5, **kwargs)
+    return _MGNet("MGNet34", 5, **kwargs)

@@ -14,7 +14,7 @@ class DenseNet(BaseNet):
     def __init__(
         self, name, block_type, layers, drop_rate=0, num_classes=10,
     ):
-        self.growth_rate = 32
+        self.growth_rate = 12
         self.drop_rate = drop_rate
         super().__init__(
             name, block_type, layers, num_classes,

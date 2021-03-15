@@ -33,7 +33,7 @@ class BaseNet(nn.Module):
 
         self.scale = self.config["Misc"]["FC_Scale"]
 
-        self._init_modules()
+        #self._init_modules()
 
     def _init_modules(self):
         if self.config["Misc"]["UseCELU"]:

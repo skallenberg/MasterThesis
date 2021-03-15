@@ -37,7 +37,7 @@ class MGNet(nn.Module):
         self.feature_interpolations = self._set_interpolations()
         self.data_interpolations = self._set_interpolations()
 
-        self._init_modules()
+        #self._init_modules()
 
     def _init_modules(self):
         if self.config["Misc"]["UseCELU"]:
@@ -47,12 +47,12 @@ class MGNet(nn.Module):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity=nonlinearity)
-            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
-                if self.config["Misc"]["GhostBatchNorm"]:
-                    pass
-                else:
-                    nn.init.constant_(m.weight, 1)
-                    nn.init.constant_(m.bias, 0)
+            #elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+            #    if self.config["Misc"]["GhostBatchNorm"]:
+            #        pass
+            #    else:
+            #        nn.init.constant_(m.weight, 1)
+            #        nn.init.constant_(m.bias, 0)
 
     def _set_data_feature_mapper(self):
         mappings = nn.ModuleList()
@@ -66,7 +66,7 @@ class MGNet(nn.Module):
         interpolations = nn.ModuleList()
         ch_in = self.channels_in
         for i in range(self.layers):
-            interpolations.append(conv_3x3(ch_in, ch_in * 2, stride=2, groups=ch_in))
+            interpolations.append(conv_1x1(ch_in, ch_in * 2, stride=2, groups=ch_in))
             ch_in *= 2
         return interpolations
 
@@ -87,7 +87,7 @@ class MGNet(nn.Module):
         out = self.init_layer(x)
         out = self.maxpool(out)
         f_ = out
-        out_ = out * 0
+        out_ = torch.zeros_like(out)
         for i in range(self.layers):
             for j in range(self.smoothing_steps):
                 out_ = out_ + self.extractors[i][j](f_ - self.mappings[i](out_))
@@ -97,7 +97,7 @@ class MGNet(nn.Module):
             )
             out_ = n_out_
 
-        out = f_
+        out = out_
         out = self.global_maxpool(out)
         out = torch.flatten(out, 1)
         out = self.fc(out)
@@ -131,7 +131,7 @@ class VMGNet(MGNet):
         out = self.init_layer(x)
         out = self.maxpool(out)
         f_ = out
-        out_ = out * 0
+        out_ = torch.zeros_like(out)
         out_list = []
         n_out_list = []
         f_list = [f_]
@@ -188,13 +188,13 @@ class FASMGNet(MGNet):
         ch_in = self.channels_in
         for i in range(1, self.layers + 1):
             prolongations.append(
-                interpolate(self.channels_in * 2 ** i, channel_scale=0.5, scale=2)
+                interpolate(type="reflectpad",in_size=int(16*2**(-i)),channels_in=self.channels_in * 2 ** i,channel_scale=0.5, scale=2)
             )
         return prolongations
 
     def _mode_1_cycle(self, out):
         f_ = out
-        out_ = out * 0
+        out_ = torch.zeros_like(out)
         out_list = []
         n_out_list = []
         f_list = [f_]
@@ -235,7 +235,7 @@ class FASMGNet(MGNet):
 
     def _mode_2_cycle(self, out):
         f_ = out
-        out_ = out * 0
+        out_ = torch.zeros_like(out)
         out_list = []
         n_out_list = []
         f_list = [f_]
@@ -269,7 +269,7 @@ class FASMGNet(MGNet):
 
     def _mode_3_cycle(self, out):
         f_ = out
-        out_ = out * 0
+        out_ = torch.zeros_like(out)
         out_list = []
         n_out_list = []
         f_list = [f_]
@@ -288,7 +288,8 @@ class FASMGNet(MGNet):
 
         for k in reversed(range(self.layers)):
             for i in reversed(range(0, self.layers - k)):
-                out_ = out_list[i] + self.prolongations[i](out_ - n_out_list[i])
+                a = self.prolongations[i](out_ - n_out_list[i])
+                out_ = out_list[i] + a
                 for j in range(self.smoothing_steps):
                     out_ = out_ + self.extractors_up[len(self.extractors_up) - k][i][j](
                         f_list[i] - self.mappings[i](out_)

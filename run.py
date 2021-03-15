@@ -12,7 +12,7 @@ from utils.config import Config
 logging.basicConfig(level=logging.INFO)
 
 if torch.cuda.is_available():
-    device = torch.device("cuda:0")
+    device = torch.device("cuda")
     logging.info("Running on %i GPUs" % (torch.cuda.device_count()))
 else:
     device = torch.device("cpu")

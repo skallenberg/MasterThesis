@@ -47,5 +47,6 @@ def choose_architecture():
 
     try:
         return eval(arch + "()")
-    except:
+    except Exception as e:
+        print(e)
         raise ValueError("Model not yet implemented")

@@ -6,17 +6,11 @@ import sys
 logging.basicConfig(level=logging.INFO)
 
 model_list = [
-    "BaseNet34",
-    "ResNet34",
-    "DenseNet34",
-    "FractalNet4",
-    "MRN_Net34",
-    "NiN_Net34",
-    "FASMGNetTest1",
-    "FASMGNetTest2",
     "MGNet34",
-    "MG16",
-    "PMG16",
+    "MGNet18",
+    "MGNet12",
+    "MGNet9",
+    "MGNetTwoGrid",
 ]
 
 for model in model_list:
@@ -25,6 +19,7 @@ for model in model_list:
     logging.info("Using Model:\t%s" % (model))
     try:
         run.train_model()
-    except:
+    except Exception as e:
+        print(e)
         logging.info("Run Failed")
 

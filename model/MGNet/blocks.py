@@ -12,12 +12,12 @@ class mapping_block(nn.Module):
     def __init__(self, channels_in, batch_norm=False):
         super().__init__()
         self.config = Config().get_instance()
-        self.conv0 = conv_3x3(channels_in, channels_in)
+        self.conv0 = self.conv0 = nn.Conv2d(channels_in, channels_in, kernel_size=3, stride=1, padding=1)
         if self.config["Misc"]["UseCELU"]:
             self.act0 = nn.CELU(self.config["Misc"]["CELU_alpha"])
         else:
             self.act0 = nn.ReLU(inplace=True)
-        self.conv1 = conv_3x3(channels_in, channels_in)
+        self.conv1 = self.conv0 = nn.Conv2d(channels_in, channels_in, kernel_size=3, stride=1, padding=1)
         self.batch_norm = batch_norm
         if self.batch_norm:
             if self.config["Misc"]["GhostBatchNorm"]:
@@ -53,7 +53,7 @@ class extractor_block(nn.Module):
     def __init__(self, channels_in, batch_norm=False):
         super().__init__()
         self.config = Config().get_instance()
-        self.conv0 = conv_3x3(channels_in, channels_in)
+        self.conv0 = nn.Conv2d(channels_in, channels_in, kernel_size=3, stride=1, padding=1)
         if self.config["Misc"]["UseCELU"]:
             self.act0 = nn.CELU(self.config["Misc"]["CELU_alpha"])
         else:

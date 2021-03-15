@@ -5,12 +5,11 @@ import torch
 from ignite.contrib.handlers.tensorboard_logger import *
 from ignite.engine import Events
 
-
 from utils import set_trainer
 from utils.config import Config
 
 if torch.cuda.is_available():
-    device = torch.device("cuda:0")
+    device = torch.device("cuda")
 else:
     device = torch.device("cpu")
 
@@ -21,8 +20,8 @@ tb_metrics = [
     "Running_Average_Loss",
     "Precision",
     "Recall",
-    "F1-Score",
-    "ROC_AUC",
+    # "F1-Score",
+    # "ROC_AUC",
 ]
 
 
@@ -36,12 +35,12 @@ def train(net, dataset):
             + "_"
             + dataset.name
             + "_"
-            + datetime.now().strftime("%m-%d-%Y-%H:%M:%S")
+            + datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
         )
         net.module.writer = writer_name
     else:
         writer_name = (
-            net.name + "_" + dataset.name + "_" + datetime.now().strftime("%m-%d-%Y-%H:%M:%S")
+            net.name + "_" + dataset.name + "_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
         )
         net.writer = writer_name
 
@@ -54,7 +53,9 @@ def train(net, dataset):
         scheduler=config["Trainer"]["LRScheduler"],
         lrfinder=config["Trainer"]["LRFinder"],
     )
-
+    
+    val_set = dataset.testloader
+    
     tb_logger.attach_output_handler(
         trainer,
         event_name=Events.ITERATION_COMPLETED,
@@ -77,24 +78,6 @@ def train(net, dataset):
         metric_names=tb_metrics,
         global_step_transform=global_step_from_engine(trainer),
     )
-
-    tb_logger.attach(
-        trainer,
-        event_name=Events.ITERATION_COMPLETED(every=500),
-        log_handler=WeightsScalarHandler(net),
-    )
-
-    tb_logger.attach(
-        trainer, event_name=Events.EPOCH_COMPLETED, log_handler=WeightsHistHandler(net),
-    )
-
-    tb_logger.attach(
-        trainer,
-        event_name=Events.ITERATION_COMPLETED(every=500),
-        log_handler=GradsScalarHandler(net),
-    )
-
-    tb_logger.attach(trainer, event_name=Events.EPOCH_COMPLETED, log_handler=GradsHistHandler(net))
 
     with torch.autograd.set_detect_anomaly(True):
         trainer.run(dataset.trainloader, max_epochs=config["Setup"]["Epochs"])

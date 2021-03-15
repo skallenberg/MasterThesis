@@ -22,6 +22,8 @@ def MRN_BaseTest():
 def MRN_BottleTest():
     return _mrn_net("MRN_BottleTest", residual_bottleneck_block, [1, 1, 1, 1])
 
+def MRN_Net18():
+    return _mrn_net("MRN_Net18", residual_base_block, [2, 2, 2, 2])
 
 def MRN_Net34():
     return _mrn_net("MRN_Net34", residual_base_block, [3, 4, 6, 3])

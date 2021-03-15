@@ -1,0 +1,99 @@
+MGNet18
+
+INFO:root:Training Results - Epoch:     25
+Average Accuracy:       0.59
+Running Average Accuracy:       0.59
+Average Loss:   1.59
+Running Average Loss:   1.59
+Average Precision:      0.60
+Average Recall: 0.59
+Average F1-Score:       0.59
+Average ROC AUC:        0.920618
+INFO:ignite.engine.engine.Engine:Engine run starting with max_epochs=1.
+INFO:ignite.engine.engine.Engine:Epoch[1] Complete. Time taken: 00:00:01
+INFO:ignite.engine.engine.Engine:Engine run complete. Time taken: 00:00:01
+INFO:root:- Mean elapsed time for 1 validation epoch: 24.26996916932985
+INFO:root:Validation Results - Epoch:   25
+Average Accuracy:       0.62
+Running Average Accuracy:       0.60
+Average Loss:   1.53
+Running Average Loss:   1.54
+Average Precision:      0.63
+Average Recall: 0.62
+Average F1-Score:       0.62
+Average ROC AUC:        0.934251
+
+MGNet12
+
+INFO:root:Training Results - Epoch:     25
+Average Accuracy:       0.69
+Running Average Accuracy:       0.69
+Average Loss:   1.43
+Running Average Loss:   1.43
+Average Precision:      0.70
+Average Recall: 0.69
+Average F1-Score:       0.69
+Average ROC AUC:        0.952286
+INFO:ignite.engine.engine.Engine:Engine run starting with max_epochs=1.
+INFO:ignite.engine.engine.Engine:Epoch[1] Complete. Time taken: 00:00:01
+INFO:ignite.engine.engine.Engine:Engine run complete. Time taken: 00:00:01
+INFO:root:- Mean elapsed time for 1 validation epoch: 14.935646050199866
+INFO:root:Validation Results - Epoch:   25
+Average Accuracy:       0.73
+Running Average Accuracy:       0.74
+Average Loss:   1.37
+Running Average Loss:   1.37
+Average Precision:      0.74
+Average Recall: 0.73
+Average F1-Score:       0.73
+Average ROC AUC:        0.962829
+
+MGNet9
+
+INFO:root:Training Results - Epoch:     25
+Average Accuracy:       0.71
+Running Average Accuracy:       0.72
+Average Loss:   1.41
+Running Average Loss:   1.40
+Average Precision:      0.72
+Average Recall: 0.71
+Average F1-Score:       0.71
+Average ROC AUC:        0.959853
+INFO:ignite.engine.engine.Engine:Engine run starting with max_epochs=1.
+INFO:ignite.engine.engine.Engine:Epoch[1] Complete. Time taken: 00:00:00
+INFO:ignite.engine.engine.Engine:Engine run complete. Time taken: 00:00:00
+INFO:root:- Mean elapsed time for 1 validation epoch: 10.074493611082435
+INFO:root:Validation Results - Epoch:   25
+Average Accuracy:       0.74
+Running Average Accuracy:       0.74
+Average Loss:   1.35
+Running Average Loss:   1.36
+Average Precision:      0.75
+Average Recall: 0.74
+Average F1-Score:       0.74
+Average ROC AUC:        0.967799
+
+MGNetTwoGrid
+
+INFO:root:Training Results - Epoch:     25
+Average Accuracy:       0.72
+Running Average Accuracy:       0.73
+Average Loss:   1.40
+Running Average Loss:   1.40
+Average Precision:      0.72
+Average Recall: 0.72
+Average F1-Score:       0.72
+Average ROC AUC:        0.960550
+INFO:ignite.engine.engine.Engine:Engine run starting with max_epochs=1.
+INFO:ignite.engine.engine.Engine:Epoch[1] Complete. Time taken: 00:00:00
+INFO:ignite.engine.engine.Engine:Engine run complete. Time taken: 00:00:00
+INFO:root:- Mean elapsed time for 1 validation epoch: 7.263525871206075
+INFO:root:Validation Results - Epoch:   25
+Average Accuracy:       0.74
+Running Average Accuracy:       0.74
+Average Loss:   1.36
+Running Average Loss:   1.37
+Average Precision:      0.75
+Average Recall: 0.74
+Average F1-Score:       0.74
+Average ROC AUC:        0.967318

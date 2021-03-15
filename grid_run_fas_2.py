@@ -6,10 +6,11 @@ import sys
 logging.basicConfig(level=logging.INFO)
 
 model_list = [
-    "MGNet18",
-    # "FASMGNetTest1",
-    # "FASMGNetTest2",
-    # "FASMGNetTest3",
+#    "FASMGNet34_2",
+#    "FASMGNet18_2",
+   "FASMGNet12_2",
+   "FASMGNet9_2",
+   "FASMGNetTwoGrid_2",
 ]
 
 for model in model_list:

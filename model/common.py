@@ -75,9 +75,9 @@ def initial_conv(channels_out):
     return nn.Conv2d(
         input_dim,
         channels_out,
-        kernel_size=7,
+        kernel_size=3,
         stride=2,
-        padding=3,
+        padding=0,
         bias=config["Misc"]["ConvolutionBias"],
         groups=groups,
     )
@@ -102,12 +102,12 @@ def conv_3x3(channels_in, channels_out, stride=1, padding=1, groups=None):
     )
 
 
-def conv_1x1(channels_in, channels_out, stride=1):
+def conv_1x1(channels_in, channels_out, stride=1, groups=None):
     config = Config().get_instance()
 
     if config["Misc"]["Depthwise"] and channels_out % channels_in == 0:
         groups = channels_in
-    else:
+    elif groups == None:
         groups = 1
     return nn.Conv2d(
         in_channels=channels_in,

@@ -21,9 +21,19 @@ def ResBaseTest():
 def ResBottleTest():
     return _resnet("ResBottleTest", residual_bottleneck_block, [1, 1])
 
+def ResNet18(**kwargs):
+    return _resnet("ResNet18", residual_base_block, [2, 2, 2, 2], **kwargs)
 
-def ResNet34():
-    return _resnet("ResNet34", residual_base_block, [3, 4, 6, 3], sd="prog")
+def ResNet34(**kwargs):
+    return _resnet("ResNet34", residual_base_block, [3, 4, 6, 3], **kwargs)
+
+def ResNet18_SD(**kwargs):
+    kwargs["sd"] = "prog"
+    return _resnet("ResNet18_SD", residual_base_block, [2, 2, 2, 2], **kwargs)
+
+def ResNet34_SD(**kwargs):
+    kwargs["sd"] = "prog"
+    return _resnet("ResNet34_SD", residual_base_block, [3, 4, 6, 3], **kwargs)
 
 
 def ResNet50():
