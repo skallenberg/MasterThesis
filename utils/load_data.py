@@ -167,6 +167,7 @@ def get_data(return_sets=False):
         mean, std = [
             torch.tensor(x, device=device, dtype=torch.float32) for x in (data_mean, data_std)
         ]
+### the following transformations are inspired by https://github.com/davidcpage/cifar10-fast/blob/master/bag_of_tricks.ipynb, Preprocessing on the GPU
 
     normalise = lambda data, mean=mean, std=std: (data - mean) / std
     unnormalise = lambda data, mean=mean, std=std: data * std + mean

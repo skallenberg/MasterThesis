@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from utils import load_data
 
+#whitening block definition inspired by https://github.com/davidcpage/cifar10-fast/blob/master/bag_of_tricks.ipynb, Input Patch Whitening
 
 def cov(X):
     X = X / np.sqrt(X.size(0) - 1)
@@ -24,7 +25,7 @@ def eigenvalues(patches):
 def compute_eigenvalues():
     dataset = load_data.get_data(return_sets=True)
     V, W = eigenvalues(
-        patches(dataset.train_set["data"][:, :, 4:-4, 4:-4])  # [:10000,:...]
-    )  # center crop to remove padding
+        patches(dataset.train_set["data"][:, :, 4:-4, 4:-4]) 
+    )
     return V, W
 

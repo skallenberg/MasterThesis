@@ -6,7 +6,7 @@ from utils.config import Config
 from utils.eigenval import compute_eigenvalues
 import os
 
-
+## BatchNorm and GhostBatchNorm inspired by https://github.com/davidcpage/cifar10-fast/blob/master/bag_of_tricks.ipynb, Setup
 class BatchNorm(nn.BatchNorm2d):
     def __init__(self, num_features, eps=1e-05, momentum=0.1, weight=True, bias=True):
         super().__init__(num_features, eps=eps, momentum=momentum)
@@ -118,7 +118,7 @@ def conv_1x1(channels_in, channels_out, stride=1, groups=None):
         groups=groups,
     )
 
-
+# Whitening Block inspired by https://github.com/davidcpage/cifar10-fast/blob/master/bag_of_tricks.ipynb, Whitening Block
 def WhiteningBlock(c_out, eps=1e-2):
     config = Config().get_instance()
 

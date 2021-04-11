@@ -6,12 +6,13 @@ import torch
 
 from ignite.engine import Engine, EventEnum, Events
 from ignite.metrics import Metric
-from ignite.metrics import EpochMetric
 import psutil
 
 global proc
 proc = psutil.Process()
 
+
+##original source code from https://pytorch.org/ignite/v0.4.2/_modules/ignite/contrib/metrics/gpu_info.html#GpuInfo and changed due to resulting errors
 class GpuInfo_Fix(Metric):
     """Provides GPU information: a) used memory percentage, b) gpu utilization percentage values as Metric
     on each iterations.

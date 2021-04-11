@@ -12,6 +12,8 @@ import torchvision
 
 from utils.config import Config
 
+# taken from https://github.com/davidcpage/cifar10-fast/blob/master/bag_of_tricks.ipynb, Setup
+
 gpu_path = "/data/skallenberg/datasets"
 local_path = "./data/datasets"
 

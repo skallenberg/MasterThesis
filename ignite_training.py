@@ -41,6 +41,8 @@ def train(net, dataset):
             net.name + "_" + dataset.name + "_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
         )
         net.writer = writer_name
+        
+### examples for tb_logger taken from https://pytorch.org/ignite/v0.4.2/contrib/handlers.html#tensorboard-logger
 
     tb_logger = TensorboardLogger(log_dir="./data/models/logs/runs/" + writer_name)
 
@@ -51,7 +53,7 @@ def train(net, dataset):
         scheduler=config["Trainer"]["LRScheduler"],
         lrfinder=config["Trainer"]["LRFinder"],
     )
-        
+
     tb_logger.attach_output_handler(
         trainer,
         event_name=Events.ITERATION_COMPLETED,
