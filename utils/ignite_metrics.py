@@ -1,45 +1,125 @@
+# -*- coding: utf-8 -*-
+import warnings
+from typing import Any, Dict, List, Tuple, Union
+
+import torch
+
+from ignite.engine import Engine, EventEnum, Events
+from ignite.metrics import Metric
 from ignite.metrics import EpochMetric
+import psutil
 
+global proc
+proc = psutil.Process()
 
-def roc_auc_compute_fn(y_preds, y_targets):
-    try:
-        from sklearn.metrics import roc_auc_score
-    except ImportError:
-        raise RuntimeError("This contrib module requires sklearn to be installed.")
+class GpuInfo_Fix(Metric):
+    """Provides GPU information: a) used memory percentage, b) gpu utilization percentage values as Metric
+    on each iterations.
 
-    y_true = y_targets.numpy()
-    y_pred = y_preds.numpy()
-    return roc_auc_score(y_true, y_pred, multi_class="ovr")
+    .. Note ::
 
+        In case if gpu utilization reports "N/A" on a given GPU, corresponding metric value is not set.
 
-class ROC_AUC(EpochMetric):
-    """Computes Area Under the Receiver Operating Characteristic Curve (ROC AUC)
-    accumulating predictions and the ground-truth during an epoch and applying
-    `sklearn.metrics.roc_auc_score <http://scikit-learn.org/stable/modules/generated/
-    sklearn.metrics.roc_auc_score.html#sklearn.metrics.roc_auc_score>`_ .
-    Args:
-        output_transform (callable, optional): a callable that is used to transform the
-            :class:`~ignite.engine.engine.Engine`'s ``process_function``'s output into the
-            form expected by the metric. This can be useful if, for example, you have a multi-output model and
-            you want to compute the metric with respect to one of the outputs.
-        check_compute_fn (bool): Optional default False. If True, `roc_curve
-            <http://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html#
-            sklearn.metrics.roc_auc_score>`_ is run on the first batch of data to ensure there are
-            no issues. User will be warned in case there are any issues computing the function.
-    ROC_AUC expects y to be comprised of 0's and 1's. y_pred must either be probability estimates or confidence
-    values. To apply an activation to y_pred, use output_transform as shown below:
-    .. code-block:: python
-        def activated_output_transform(output):
-            y_pred, y = output
-            y_pred = torch.sigmoid(y_pred)
-            return y_pred, y
-        roc_auc = ROC_AUC(activated_output_transform)
+    Examples:
+
+        .. code-block:: python
+
+            # Default GPU measurements
+            GpuInfo().attach(trainer, name='gpu')  # metric names are 'gpu:X mem(%)', 'gpu:X util(%)'
+
+            # Logging with TQDM
+            ProgressBar(persist=True).attach(trainer, metric_names=['gpu:0 mem(%)', 'gpu:0 util(%)'])
+            # Progress bar will looks like
+            # Epoch [2/10]: [12/24]  50%|█████      , gpu:0 mem(%)=79, gpu:0 util(%)=59 [00:17<1:23]
+
+            # Logging with Tensorboard
+            tb_logger.attach(trainer,
+                             log_handler=OutputHandler(tag="training", metric_names='all'),
+                             event_name=Events.ITERATION_COMPLETED)
     """
 
-    def __init__(self, output_transform=lambda x: x, check_compute_fn: bool = False):
-        super(ROC_AUC, self).__init__(
-            roc_auc_compute_fn,
-            output_transform=output_transform,
-            check_compute_fn=check_compute_fn,
-        )
+    def __init__(self) -> None:
+        try:
+            import pynvml
+        except ImportError:
+            raise RuntimeError(
+                "This contrib module requires pynvml to be installed. "
+                "Please install it with command: \n pip install pynvml"
+            )
+            # Let's check available devices
+        if not torch.cuda.is_available():
+            raise RuntimeError("This contrib module requires available GPU")
 
+        from pynvml.smi import nvidia_smi
+
+        # Let it fail if no libnvidia drivers or NMVL library found
+        self.nvsmi = nvidia_smi.getInstance()
+        super(GpuInfo_Fix, self).__init__()
+
+    def reset(self) -> None:
+        pass
+
+
+    def update(self, output: Tuple[torch.Tensor, torch.Tensor]) -> None:
+        pass
+
+
+    def compute(self) -> List[Dict[str, Any]]:
+        data = self.nvsmi.DeviceQuery(
+            "memory.used, memory.total, utilization.gpu"
+        )  # type: Dict[str, List[Dict[str, Any]]]
+        if len(data) == 0 or ("gpu" not in data):
+            warnings.warn("No GPU information available")
+            return []
+        return data["gpu"]
+
+
+    def completed(self, engine: Engine, name: str) -> None:
+        data = self.compute()
+        if len(data) < 1:
+            warnings.warn("No GPU information available")
+            return
+
+        for i, data_by_rank in enumerate(data):
+            mem_name = f"{name}_{i}_mem__"
+
+            if "fb_memory_usage" not in data_by_rank:
+                warnings.warn(f"No GPU memory usage information available in {data_by_rank}")
+                continue
+            mem_report = data_by_rank["fb_memory_usage"]
+            if not ("used" in mem_report and "total" in mem_report):
+                warnings.warn(
+                    "GPU memory usage information does not provide used/total "
+                    f"memory consumption information in {mem_report}"
+                )
+                continue
+
+            engine.state.metrics[mem_name] = int(mem_report["used"] * 100.0 / mem_report["total"])
+
+        for i, data_by_rank in enumerate(data):
+            util_name = f"{name}_{i}_util__"
+            if "utilization" not in data_by_rank:
+                warnings.warn(f"No GPU utilization information available in {data_by_rank}")
+                continue
+            util_report = data_by_rank["utilization"]
+            if not ("gpu_util" in util_report):
+                warnings.warn(f"GPU utilization information does not provide 'gpu_util' information in {util_report}")
+                continue
+            try:
+                engine.state.metrics[util_name] = int(util_report["gpu_util"])
+            except ValueError:
+                # Do not set GPU utilization information
+                pass
+            
+        cpu_use = int(proc.cpu_percent())
+        ram_percent = int(proc.memory_percent() * 100)
+        ram_use = int(proc.memory_info().rss / 1024 / 1024)
+        engine.state.metrics["cpu_usage"] = cpu_use
+        engine.state.metrics["ram_percent"] = ram_percent
+        engine.state.metrics["ram_usage"] = ram_use
+        
+
+    def attach(  # type: ignore
+        self, engine: Engine, name: str = "gpu", event_name: Union[str, EventEnum] = Events.ITERATION_COMPLETED
+    ) -> None:
+        engine.add_event_handler(event_name, self.completed, name)

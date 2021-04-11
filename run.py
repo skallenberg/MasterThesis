@@ -6,7 +6,6 @@ import torch.nn as nn
 import ignite_training
 from utils import load_data
 from utils import set_config
-from utils import visualize
 from utils.config import Config
 
 logging.basicConfig(level=logging.INFO)
@@ -19,7 +18,7 @@ else:
     logging.info("Running on CPU")
 
 
-def train_model(visualize_graph=False):
+def train_model():
     config = Config().get_instance()
     torch.backends.cudnn.enabled = config["Misc"]["cudnnEnabled"]
     torch.backends.cudnn.benchmark = config["Misc"]["cudnnBenchmark"]
@@ -36,10 +35,7 @@ def train_model(visualize_graph=False):
 
     logging.info("Initialized Network")
 
-    if visualize_graph:
-        visualize.make_graph(net)
-    else:
-        net = ignite_training.train(net, data)
+    net = ignite_training.train(net, data)
 
     logging.info("Finished Run")
 

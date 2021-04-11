@@ -5,8 +5,8 @@ import torch
 from ignite.contrib.handlers.tensorboard_logger import *
 from ignite.engine import Events
 
-from utils import set_trainer
 from utils.config import Config
+from utils import set_trainer
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -15,13 +15,11 @@ else:
 
 tb_metrics = [
     "Accuracy",
-    "Running_Average_Accuracy",
-    "Loss",
-    "Running_Average_Loss",
     "Precision",
     "Recall",
-    # "F1-Score",
-    # "ROC_AUC",
+    "F1-Score",
+    "Top-3_Error",
+    "Top-5_Error",
 ]
 
 
@@ -46,30 +44,25 @@ def train(net, dataset):
 
     tb_logger = TensorboardLogger(log_dir="./data/models/logs/runs/" + writer_name)
 
-    trainer, train_evaluator, test_evaluator = set_trainer.get_trainer(
+    trainer, test_evaluator = set_trainer.get_trainer(
         net,
         dataset,
         early_stop=config["Trainer"]["EarlyStopping"],
         scheduler=config["Trainer"]["LRScheduler"],
         lrfinder=config["Trainer"]["LRFinder"],
     )
-    
-    val_set = dataset.testloader
-    
+        
     tb_logger.attach_output_handler(
         trainer,
         event_name=Events.ITERATION_COMPLETED,
         tag="training",
         output_transform=lambda loss: {"Loss": loss},
     )
-
-    tb_logger.attach_output_handler(
-        train_evaluator,
-        event_name=Events.EPOCH_COMPLETED,
-        tag="training_validation",
-        metric_names=tb_metrics,
-        global_step_transform=global_step_from_engine(trainer),
-    )
+    
+    tb_logger.attach(trainer,
+                 log_handler=OutputHandler(tag="training", metric_names="all", global_step_transform=global_step_from_engine(trainer)),
+                 event_name=Events.ITERATION_COMPLETED,
+                 )
 
     tb_logger.attach_output_handler(
         test_evaluator,
