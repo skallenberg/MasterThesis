@@ -6,27 +6,23 @@ import ignite.metrics as metrics
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
-from ignite.contrib.handlers import FastaiLRFinder
-from ignite.contrib.handlers import ProgressBar
+from ignite.contrib.handlers import ProgressBar, FastaiLRFinder, LRScheduler
 from ignite.contrib.handlers.param_scheduler import CosineAnnealingScheduler
 from ignite.contrib.handlers.tensorboard_logger import *
-from ignite.engine import Engine
-from ignite.engine import Events
-from ignite.engine import create_supervised_evaluator
-from ignite.engine import create_supervised_trainer
-from ignite.handlers import EarlyStopping
-from ignite.handlers import TerminateOnNan
-from ignite.handlers import Timer
+from ignite.engine import Engine, Events, create_supervised_trainer
+from ignite.handlers import EarlyStopping, TerminateOnNan, Timer
+from torch.optim.lr_scheduler import MultiplicativeLR
+
 import os
 import pandas as pd
-from torch.cuda.amp import GradScaler
-from torch.cuda.amp import autocast
+from torch.cuda.amp import GradScaler, autocast
 
-from utils import set_config
+from utils import set_config, usage_stats
 from utils.config import Config
 from utils.cross_entropy import CrossEntropyLoss
-from utils.ignite_metrics import ROC_AUC
 from utils.mixup import *
+from utils.ignite_metrics import GpuInfo_Fix as GpuInfo
+import copy
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -41,8 +37,7 @@ def score_fn(engine):
 
 def activated_output_transform(output):
     y_pred, y = output
-    soft = nn.Softmax(dim=1)
-    y_pred = soft(y_pred)
+    y_pred = torch.sigmoid(y_pred)
     return y_pred, y
 
 
@@ -58,12 +53,12 @@ def _set_metrics():
     else:
         criterion = torch.nn.CrossEntropyLoss().to(device)
     val_metrics = {
-        "Accuracy": metrics.Accuracy(),
-        "Running_Average_Accuracy": metrics.RunningAverage(metrics.Accuracy()),
-        "Loss": metrics.Loss(criterion),
-        "Running_Average_Loss": metrics.RunningAverage(metrics.Loss(criterion)),
-        "Precision": metrics.Precision(average=True),
-        "Recall": metrics.Recall(average=True),
+        "Accuracy": metrics.Accuracy(device=device),
+        "Precision": metrics.Precision(average=True,device=device),
+        "Recall": metrics.Recall(average=True,device=device),        
+        "F1-Score": metrics.Fbeta(beta=1.0,device=device),
+        "Top-3_Error": metrics.TopKCategoricalAccuracy(k=3),
+        "Top-5_Error": metrics.TopKCategoricalAccuracy(k=5),
     }
     return val_metrics, criterion
 
@@ -86,21 +81,13 @@ def _set_amp_trainer(net, dataset, optimizer, criterion):
                 y_pred = net(x)
                 loss = mixup_criterion(criterion, y_pred, y_a, y_b, lam)
         else:
-            # Runs the forward pass with autocasting.
             with autocast():
                 y_pred = net(x)
                 loss = criterion(y_pred, y)
-        # Scales loss.  Calls backward() on scaled loss to create scaled gradients.
-        # Backward passes under autocast are not recommended.
-        # Backward ops run in the same precision that autocast used for corresponding forward ops.
         scaler.scale(loss).backward()
 
-        # scaler.step() first unscales the gradients of the optimizer's assigned params.
-        # If these gradients do not contain infs or NaNs, optimizer.step() is then called,
-        # otherwise, optimizer.step() is skipped.
         scaler.step(optimizer)
 
-        # Updates the scale for next iteration.
         scaler.update()
 
         return loss.item()
@@ -133,6 +120,31 @@ def _set_mixup_trainer(net, dataset, optimizer, criterion):
 
     return trainer
 
+def _get_evaluator(net, val_metrics):
+    
+    def _validation_step(engine, batch):
+        net.eval()
+        with torch.no_grad():
+            x, y = batch["input"], batch["target"]
+            with autocast():
+                y_pred = net(x)
+        
+        net.train()
+        return y_pred, y
+
+    test_evaluator = Engine(_validation_step)
+    
+    for name,metric in val_metrics.items():
+        metric.attach(test_evaluator,name)
+    
+    return test_evaluator
+
+def _lr_schedule(epoch, stepsize = 30):
+    if epoch % stepsize == 0:
+        return 0.1
+    else:
+        return 1
+
 
 def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False):
     config = Config().get_instance()
@@ -150,14 +162,9 @@ def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False)
         trainer = _set_mixup_trainer(net, dataset, optimizer, criterion)
     else:
         trainer = create_supervised_trainer(net, optimizer, criterion)
-
-    train_evaluator = create_supervised_evaluator(
-        net, metrics=val_metrics,device=device, prepare_batch=dict_to_pair, non_blocking=True
-    )
-    test_evaluator = create_supervised_evaluator(
-        net, metrics=val_metrics,device=device, prepare_batch=dict_to_pair, non_blocking=True
-    )
-
+    
+    test_evaluator = _get_evaluator(net, val_metrics)
+    
     if lrfinder:
         find_lr(
             net,
@@ -176,62 +183,25 @@ def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False)
     if scheduler:
         scheduler = CosineAnnealingScheduler(optimizer, "lr", 0.01, 0.0005, cycle_size=len(dataset.trainloader))
         trainer.add_event_handler(Events.ITERATION_STARTED, scheduler)
+        
+    
+    GpuInfo().attach(trainer, name='gpu')
 
     ProgressBar().attach(trainer, output_transform=lambda x: {"Loss": x})
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
     timer = Timer(average=True)
-    timer.attach(trainer, step=Events.EPOCH_COMPLETED)
-    
-    # tr_frame = pd.DataFrame(columns=["Epoch","Time","Accuracy", "Running_Average_Accuracy", "Loss","Running_Average_Loss","Precision","Recall","F1-Score","ROC_AUC"])
-    # os.mkdir("./data/models/logs/csv/" + net.writer+"/")
-    # tr_frame.to_csv("./data/models/logs/csv/" + net.writer +"/TR.csv",index=False)
-    # val_frame = pd.DataFrame(columns=["Epoch","Time","Accuracy", "Running_Average_Accuracy", "Loss","Running_Average_Loss","Precision","Recall","F1-Score","ROC_AUC"])
-    # val_frame.to_csv("./data/models/logs/csv/"+ net.writer+"/VAL.csv",index=False)
-    
-    # @trainer.on(Events.EPOCH_COMPLETED(every=2))
-    # def log_training_results(engine):
-    #     train_evaluator.run(dataset.trainloader)
-    #     metrics = train_evaluator.state.metrics
-    #     #tr_frame = pd.read_csv("./data/models/logs/csv/"+ net.writer +"/TR.csv", header=0)
-    #     #tr_frame = tr_frame.append({"Epoch":trainer.state.epoch,"Time":timer.value(),"Accuracy":metrics["Accuracy"], "Running_Average_Accuracy":metrics["Running_Average_Accuracy"], "Loss":metrics["Loss"],"Running_Average_Loss":metrics["Running_Average_Loss"],"Precision":metrics["Precision"],"Recall":metrics["Recall"],"F1-Score":metrics["F1-Score"],"ROC_AUC":metrics["ROC_AUC"]}, ignore_index=True)
-    #     #tr_frame.to_csv("./data/models/logs/csv/"+ net.writer+"/TR.csv",index=False)
-    #     # logging.info("- Mean elapsed time for 1 trainings epoch: {}".format(timer.value()))
-    #     # logging.info(
-    #     #     "Training Results - Epoch:\t{}\nAverage Accuracy:\t{:.2f}\nRunning Average Accuracy:\t{:.2f}\nAverage Loss:\t{:.2f}\nRunning Average Loss:\t{:.2f}\nAverage Precision:\t{:.2f}\nAverage Recall:\t{:.2f}\nAverage F1-Score:\t{:.2f}\nAverage ROC AUC:\t{:2f}".format(
-    #     #         trainer.state.epoch,
-    #     #         metrics["Accuracy"],
-    #     #         metrics["Running_Average_Accuracy"],
-    #     #         metrics["Loss"],
-    #     #         metrics["Running_Average_Loss"],
-    #     #         metrics["Precision"],
-    #     #         metrics["Recall"],
-    #     #         metrics["F1-Score"],
-    #     #         metrics["ROC_AUC"],
-    #     #     )
-    #     # )
+    timer.attach(trainer, step=Events.EPOCH_COMPLETED(every=10))
 
-    # @trainer.on(Events.EPOCH_COMPLETED(every=2))
-    # def log_validation_results(engine):
-    #     test_evaluator.run(dataset.testloader)
-    #     metrics = test_evaluator.state.metrics
-    #     # val_frame = pd.read_csv("./data/models/logs/csv/"+ net.writer +"/VAL.csv", header=0)
-    #     # val_frame = val_frame.append({"Epoch":trainer.state.epoch,"Time":timer.value(),"Accuracy":metrics["Accuracy"], "Running_Average_Accuracy":metrics["Running_Average_Accuracy"], "Loss":metrics["Loss"],"Running_Average_Loss":metrics["Running_Average_Loss"],"Precision":metrics["Precision"],"Recall":metrics["Recall"],"F1-Score":metrics["F1-Score"],"ROC_AUC":metrics["ROC_AUC"]}, ignore_index=True)
-    #     # val_frame.to_csv("./data/models/logs/csv/"+ net.writer+"/VAL.csv",index=False)
-    #     logging.info("- Mean elapsed time for 1 validation epoch: {}".format(timer.value()))
-    #     logging.info(
-    #         "Validation Results - Epoch:\t{}\nAverage Accuracy:\t{:.2f}\nRunning Average Accuracy:\t{:.2f}\nAverage Loss:\t{:.2f}\nRunning Average Loss:\t{:.2f}\nAverage Precision:\t{:.2f}\nAverage Recall:\t{:.2f}".format(
-    #             trainer.state.epoch,
-    #             metrics["Accuracy"],
-    #             metrics["Running_Average_Accuracy"],
-    #             metrics["Loss"],
-    #             metrics["Running_Average_Loss"],
-    #             metrics["Precision"],
-    #             metrics["Recall"],
-    #         )
-    #     )
+    @trainer.on(Events.EPOCH_COMPLETED(every=10))
+    def log_validation_results():
+        test_evaluator.run(dataset.testloader)
+        
+    _m_scheduler = MultiplicativeLR(optimizer, _lr_schedule, last_epoch=-1, verbose=False)
+    scheduler = LRScheduler(_m_scheduler)
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, scheduler)
 
-    return trainer, train_evaluator, test_evaluator
+    return trainer, test_evaluator
 
 
 def find_lr(model, optimizer, trainer, dataset, nruns=1, plot=False):
