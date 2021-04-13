@@ -27,20 +27,10 @@ def train(net, dataset):
 
     config = Config().get_instance()
 
-    if torch.cuda.device_count() > 1:
-        writer_name = (
-            net.module.name
-            + "_"
-            + dataset.name
-            + "_"
-            + datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
-        )
-        net.module.writer = writer_name
-    else:
-        writer_name = (
-            net.name + "_" + dataset.name + "_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
-        )
-        net.writer = writer_name
+    writer_name = (
+        net.name + "_" + dataset.name + "_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+    )
+    net.writer = writer_name
         
 ### examples for tb_logger taken from https://pytorch.org/ignite/v0.4.2/contrib/handlers.html#tensorboard-logger
 
