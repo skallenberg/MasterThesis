@@ -38,10 +38,7 @@ def train(net, dataset):
 
     trainer, test_evaluator = set_trainer.get_trainer(
         net,
-        dataset,
-        early_stop=config["Trainer"]["EarlyStopping"],
-        scheduler=config["Trainer"]["LRScheduler"],
-        lrfinder=config["Trainer"]["LRFinder"],
+        dataset
     )
 
     tb_logger.attach_output_handler(

@@ -3,11 +3,10 @@ import logging
 import ignite.metrics as metrics
 import matplotlib.pyplot as plt
 import torch
-from ignite.contrib.handlers import ProgressBar, FastaiLRFinder, LRScheduler
-from ignite.contrib.handlers.param_scheduler import CosineAnnealingScheduler
+from ignite.contrib.handlers import ProgressBar, LRScheduler
 from ignite.contrib.handlers.tensorboard_logger import *
 from ignite.engine import Engine, Events, create_supervised_trainer
-from ignite.handlers import EarlyStopping, TerminateOnNan, Timer
+from ignite.handlers import TerminateOnNan, Timer
 from torch.optim.lr_scheduler import MultiplicativeLR
 
 from torch.cuda.amp import GradScaler, autocast
@@ -104,7 +103,7 @@ def _lr_schedule(epoch, stepsize = 30):
         return 1
 
 
-def get_trainer(net, dataset, early_stop=False, scheduler=False, lrfinder=False):
+def get_trainer(net, dataset):
     config = Config().get_instance()
 
     MixedPrecision = config["Trainer"]["MixedPrecision"]
