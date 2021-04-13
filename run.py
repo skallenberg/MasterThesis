@@ -29,8 +29,6 @@ def train_model():
 
     net = set_config.choose_architecture()
 
-    if torch.cuda.device_count() > 1:
-        net = nn.DistributedDataParallel(net)
     net = net.to(device)
 
     logging.info("Initialized Network")
